@@ -1,0 +1,87 @@
+/* Build with `npm run prod` (or `npm run dev` while developing). */
+@import "tailwindcss";
+
+/* Flowbite design tokens: semantic colors (bg-brand, text-heading,
+   border-default, ...), radii (rounded-base) and the Inter font stack.
+   Swap for "flowbite/src/themes/minimal" etc. to change the look. */
+@import "flowbite/src/themes/default";
+
+/* Flowbite component styles, including form controls (replaces
+   @tailwindcss/forms) and tooltips. */
+@plugin "flowbite/plugin";
+
+/* Django templates are auto-detected now that source(none) is gone above.
+   node_modules is excluded from auto-detection by default, so Flowbite's JS
+   still needs an explicit @source for the classes it toggles at runtime
+   (dropdowns, modals, collapse, backdrops). */
+@source "../../node_modules/flowbite";
+
+/* Dark mode is class-based, matching Flowbite's theme: its tokens switch
+   when <html> has the "dark" class (set by templates/partials/theme_init.html
+   and static/js/theme-toggle.js). This makes dark: utilities follow the same
+   class instead of the OS setting. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Dark native controls and scrollbars too. */
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  .dark {
+    color-scheme: dark;
+  }
+}
+
+/* Shared building blocks, written with Flowbite's tokens so every page
+   follows the theme. Templates use these instead of repeating long class lists. */
+@layer components {
+  .card {
+    @apply rounded-base border border-default bg-neutral-primary-soft p-6 shadow-xs sm:p-8;
+  }
+
+  /* Forms (applied by templates/partials/field.html via django-widget-tweaks) */
+  .label {
+    @apply mb-2.5 block text-sm font-medium text-heading;
+  }
+  .input {
+    @apply block w-full rounded-base border border-default-medium bg-neutral-secondary-medium px-3 py-2.5 text-sm text-heading shadow-xs placeholder:text-body focus:border-brand focus:ring-brand;
+  }
+  .input-error {
+    @apply border-danger-subtle bg-danger-soft text-fg-danger-strong placeholder:text-fg-danger-strong focus:border-danger focus:ring-danger;
+  }
+  .helper-text {
+    @apply mt-2.5 text-sm text-body [&_ul]:list-disc [&_ul]:space-y-0.5 [&_ul]:ps-5;
+  }
+  .field-error {
+    @apply mt-2.5 text-sm text-fg-danger-strong;
+  }
+
+  /* Buttons (Flowbite button styles). Tailwind v4 can't @apply a custom
+     class, so the shared part is one rule listing every variant. */
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger,
+  .btn-purple,
+  .btn-green {
+    @apply box-border inline-flex items-center justify-center rounded-base border px-4 py-2.5 text-sm leading-5 font-medium shadow-xs focus:ring-4 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply border-transparent bg-brand text-white hover:bg-brand-strong focus:ring-brand-medium;
+  }
+  .btn-secondary {
+    @apply border-default-medium bg-neutral-secondary-medium text-body hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-neutral-tertiary;
+  }
+  .btn-danger {
+    @apply border-transparent bg-danger text-white hover:bg-danger-strong focus:ring-danger-medium;
+  }
+  .btn-purple {
+    @apply border-transparent bg-purple text-white hover:opacity-90 focus:ring-purple/40;
+  }
+  .btn-green {
+    @apply border-transparent bg-success text-white hover:bg-success-strong focus:ring-success-medium;
+  }
+
+  .link {
+    @apply font-medium text-fg-brand hover:underline;
+  }
+}

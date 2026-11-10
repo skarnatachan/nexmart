@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.product_name }} - Nexmart{% endblock title %}
+{% block content %}
+    <section class="py-4 antialiased md:py-8">
+        <div class="mx-auto max-w-screen-xl px-4">
+            <div class="flex flex-col gap-8 lg:flex-row">
+                <div class="lg:w-1/2">
+                    {% if product.product_image %}
+                        <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}"
+                             class="w-full rounded-base border border-default object-cover"/>
+                    {% else %}
+                        <div class="flex aspect-square w-full items-center justify-center rounded-base border border-default bg-neutral-primary-soft text-sm text-body">
+                            No image
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="lg:w-1/2">
+                    <h1 class="text-2xl font-bold text-heading sm:text-3xl">{{ product.product_name }}</h1>
+                    <p class="mt-4 text-2xl font-bold text-heading">$ {{ product.price }}</p>
+                    <p class="mt-4 text-body">{{ product.description }}</p>
+
+                    <div class="mt-6">
+                        <h2 class="label">Color</h2>
+                        <div class="flex flex-wrap gap-2">
+                            {% for value, label in colors %}
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="color" value="{{ value }}"
+                                           {% if product.color == value %}checked{% endif %} class="peer sr-only"/>
+                                    <span class="inline-flex items-center rounded-base border border-default-medium bg-neutral-secondary-medium px-3 py-1.5 text-sm text-body peer-checked:border-brand peer-checked:bg-brand-softer peer-checked:text-fg-brand-strong">
+                                        {{ label }}
+                                    </span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <h2 class="label">Size</h2>
+                        <div class="flex flex-wrap gap-2">
+                            {% for value, label in sizes %}
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="size" value="{{ value }}"
+                                           {% if product.size == value %}checked{% endif %} class="peer sr-only"/>
+                                    <span class="inline-flex items-center rounded-base border border-default-medium bg-neutral-secondary-medium px-3 py-1.5 text-sm text-body peer-checked:border-brand peer-checked:bg-brand-softer peer-checked:text-fg-brand-strong">
+                                        {{ label }}
+                                    </span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% if product.stock == 0 %}
+                        <button type="button" disabled
+                                class="btn-secondary mt-8 w-full sm:w-auto sm:px-8">
+                            <svg class="me-2 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M5 5l14 14M19 5 5 19"/>
+                            </svg>
+                            Out of Stock
+                        </button>
+                    {% else %}
+                        <button type="button" class="btn-primary mt-8 w-full sm:w-auto sm:px-8">
+                            <svg class="me-2 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M3 3h2l.4 2M7 13h10l3-8H5.4M7 13 5.4 5M7 13l-2.293 2.293A1 1 0 0 0 5 17h12m-6 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm-6 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"/>
+                            </svg>
+                            Add to Cart
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mt-12 border-t border-default pt-8">
+                <h2 class="mb-6 text-xl font-bold text-heading">Customer Reviews</h2>
+                <div class="space-y-6">
+                    {% for review in reviews %}
+                        <div class="flex gap-4 border-b border-default-subtle pb-6">
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-neutral-tertiary-medium text-body">
+                                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1c0-2.76-3.58-5-8-5Z"/>
+                                </svg>
+                            </span>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-semibold text-heading">{{ review.name }}</span>
+                                    <span class="text-xs text-body-subtle">{{ review.created_at|date:"M d, Y" }}</span>
+                                </div>
+                                <p class="mt-1 text-sm text-body">{{ review.comment }}</p>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-sm text-body">No reviews yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock content %}
