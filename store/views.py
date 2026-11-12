@@ -2,9 +2,52 @@ from decimal import Decimal, InvalidOperation
 from django.shortcuts import render, get_object_or_404
 from .models import Product, Review
 from category.models import Category
+from carts.models import Cart
+
+def _one_per_product_name(products_qs):
+    """Collapse variant rows sharing a product_name into a single representative,
+    preferring an in-stock variant so the listing doesn't lead with a dead end."""
+    seen = set()
+    representatives = []
+    for product in products_qs.order_by('product_name', '-stock', 'id'):
+        if product.product_name in seen:
+            continue
+        seen.add(product.product_name)
+        representatives.append(product)
+    return representatives
+
+def _best_variant(matches):
+    return max(matches, key=lambda v: v.stock, default=None)
+
+def _variant_links(product, variants):
+    color_links = []
+    for value, label in Product.COLOR_CHOICES:
+        matches = [v for v in variants if v.color == value]
+        same_size = [v for v in matches if v.size == product.size]
+        color_links.append((value, label, _best_variant(same_size) or _best_variant(matches)))
+
+    size_links = []
+    for value, label in Product.SIZE_CHOICES:
+        matches = [v for v in variants if v.size == value]
+        same_color = [v for v in matches if v.color == product.color]
+        size_links.append((value, label, _best_variant(same_color) or _best_variant(matches)))
+
+    return color_links, size_links
+
+def _cart_quantities(request):
+    session_key = request.session.session_key
+    if not session_key:
+        return {}
+    cart_obj = Cart.objects.filter(cart_id=session_key).first()
+    if not cart_obj:
+        return {}
+    return dict(cart_obj.items.filter(is_active=True).values_list('product_id', 'quantity'))
 
 def home(request):
-    products = Product.objects.all().filter(is_available=True)
+    products = _one_per_product_name(Product.objects.filter(is_available=True))
+    quantities = _cart_quantities(request)
+    for product in products:
+        product.cart_quantity = quantities.get(product.id, 0)
     context = {'products': products}
     return render(request, 'store/home.html', context)
 
@@ -42,9 +85,14 @@ def store(request, category_slug=None):
     if selected_sizes:
         products = products.filter(size__in=selected_sizes)
 
+    representatives = _one_per_product_name(products)
+    quantities = _cart_quantities(request)
+    for rep in representatives:
+        rep.cart_quantity = quantities.get(rep.id, 0)
+
     categories = Category.objects.all()
     context = {
-        'products': products,
+        'products': representatives,
         'categories': categories,
         'category': category,
         'selected_categories': selected_categories,
@@ -59,10 +107,16 @@ def product_detail(request, category_slug=None, product_slug=None):
         Product, slug=product_slug, category__slug=category_slug, is_available=True
     )
     reviews = product.reviews.all()
+    variants = [v for v in product.variants() if v.stock > 0]
+    color_links, size_links = _variant_links(product, variants)
+
+    cart_quantity = _cart_quantities(request).get(product.id, 0)
+
     context = {
         'product': product,
         'reviews': reviews,
-        'sizes': Product.SIZE_CHOICES,
-        'colors': Product.COLOR_CHOICES,
+        'color_links': color_links,
+        'size_links': size_links,
+        'cart_quantity': cart_quantity,
     }
     return render(request, 'store/product_detail.html', context)

@@ -283,6 +283,7 @@
     --color-fg-brand: var(--color-blue-700);
     --color-fg-brand-strong: var(--color-blue-900);
     --color-fg-success-strong: var(--color-emerald-900);
+    --color-fg-danger: var(--color-rose-700);
     --color-fg-danger-strong: var(--color-rose-900);
     --color-fg-warning: var(--color-orange-900);
     --color-fg-disabled: var(--color-gray-400);
@@ -915,9 +916,6 @@
   .me-2 {
     margin-inline-end: calc(var(--spacing) * 2);
   }
-  .mt-0\.5 {
-    margin-top: calc(var(--spacing) * 0.5);
-  }
   .mt-1 {
     margin-top: var(--spacing);
   }
@@ -1434,6 +1432,9 @@
   .w-5 {
     width: calc(var(--spacing) * 5);
   }
+  .w-6 {
+    width: calc(var(--spacing) * 6);
+  }
   .w-8 {
     width: calc(var(--spacing) * 8);
   }
@@ -1628,6 +1629,9 @@
   .justify-start {
     justify-content: flex-start;
   }
+  .gap-1 {
+    gap: var(--spacing);
+  }
   .gap-2 {
     gap: calc(var(--spacing) * 2);
   }
@@ -1707,6 +1711,9 @@
     overflow-x: auto;
     border: 1px solid var(--color-default);
     border-radius: var(--radius-base);
+  }
+  .overflow-x-auto {
+    overflow-x: auto;
   }
   .overflow-x-hidden {
     overflow-x: hidden;
@@ -1877,6 +1884,9 @@
   .bg-brand-softer {
     background-color: var(--color-brand-softer);
   }
+  .bg-danger {
+    background-color: var(--color-danger);
+  }
   .bg-danger-soft {
     background-color: var(--color-danger-soft);
   }
@@ -1915,9 +1925,6 @@
   }
   .bg-neutral-tertiary-medium {
     background-color: var(--color-neutral-tertiary-medium);
-  }
-  .bg-red-700 {
-    background-color: var(--color-red-700);
   }
   .bg-success-soft {
     background-color: var(--color-success-soft);
@@ -2011,8 +2018,14 @@
   .px-0 {
     padding-inline: 0px;
   }
+  .px-1\.5 {
+    padding-inline: calc(var(--spacing) * 1.5);
+  }
   .px-2 {
     padding-inline: calc(var(--spacing) * 2);
+  }
+  .px-2\.5 {
+    padding-inline: calc(var(--spacing) * 2.5);
   }
   .px-3 {
     padding-inline: calc(var(--spacing) * 3);
@@ -2025,6 +2038,12 @@
   }
   .px-6 {
     padding-inline: calc(var(--spacing) * 6);
+  }
+  .py-0\.5 {
+    padding-block: calc(var(--spacing) * 0.5);
+  }
+  .py-1 {
+    padding-block: var(--spacing);
   }
   .py-1\.5 {
     padding-block: calc(var(--spacing) * 1.5);
@@ -2094,6 +2113,9 @@
   }
   .text-center {
     text-align: center;
+  }
+  .text-left {
+    text-align: left;
   }
   .text-start {
     text-align: start;
@@ -2238,6 +2260,9 @@
   .text-fg-brand-strong {
     color: var(--color-fg-brand-strong);
   }
+  .text-fg-danger {
+    color: var(--color-fg-danger);
+  }
   .text-fg-danger-strong {
     color: var(--color-fg-danger-strong);
   }
@@ -2277,6 +2302,9 @@
   }
   .opacity-0 {
     opacity: 0%;
+  }
+  .opacity-40 {
+    opacity: 40%;
   }
   .opacity-100 {
     opacity: 100%;
@@ -2336,15 +2364,6 @@
       color: var(--color-gray-900);
     }
   }
-  :is(:where(.peer):checked ~ .peer-checked\:border-brand) {
-    border-color: var(--color-brand);
-  }
-  :is(:where(.peer):checked ~ .peer-checked\:bg-brand-softer) {
-    background-color: var(--color-brand-softer);
-  }
-  :is(:where(.peer):checked ~ .peer-checked\:text-fg-brand-strong) {
-    color: var(--color-fg-brand-strong);
-  }
   :is(:where(.peer):placeholder-shown ~ .peer-placeholder-shown\:translate-y-0) {
     --tw-translate-y: 0px;
     translate: var(--tw-translate-x) var(--tw-translate-y);
@@ -2379,6 +2398,9 @@
     color: var(--color-body);
   }
   @media (hover: hover) {
+    .hover\:border-brand:hover {
+      border-color: var(--color-brand);
+    }
     .hover\:border-default:hover {
       border-color: var(--color-default);
     }
@@ -2417,14 +2439,14 @@
     .hover\:text-fg-brand:hover {
       color: var(--color-fg-brand);
     }
+    .hover\:text-fg-danger-strong:hover {
+      color: var(--color-fg-danger-strong);
+    }
     .hover\:text-gray-900:hover {
       color: var(--color-gray-900);
     }
     .hover\:text-heading:hover {
       color: var(--color-heading);
-    }
-    .hover\:text-red-700:hover {
-      color: var(--color-red-700);
     }
     .hover\:underline:hover {
       text-decoration-line: underline;
@@ -2644,9 +2666,6 @@
       background-color: color-mix(in oklab, var(--color-gray-900) 80%, transparent);
     }
   }
-  .dark\:bg-red-600:where(.dark, .dark *) {
-    background-color: var(--color-red-600);
-  }
   .dark\:text-gray-300:where(.dark, .dark *) {
     color: var(--color-gray-300);
   }
@@ -2674,9 +2693,6 @@
     }
     .dark\:hover\:bg-gray-800:where(.dark, .dark *):hover {
       background-color: var(--color-gray-800);
-    }
-    .dark\:hover\:text-red-600:where(.dark, .dark *):hover {
-      color: var(--color-red-600);
     }
     .dark\:hover\:text-white:where(.dark, .dark *):hover {
       color: var(--color-white);

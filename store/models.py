@@ -23,13 +23,16 @@ class Product(models.Model):
         ("red", "Red"),
     ]
 
-    product_name = models.CharField(max_length=200, unique=True)
-    slug = models.SlugField(max_length=200, unique=True)
+    product_name = models.CharField(max_length=200)
+    slug = models.SlugField(
+        max_length=200, unique=True, blank=True,
+        help_text="Leave blank to auto-generate a unique slug for this variant.",
+    )
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     product_image = models.ImageField(upload_to='images/products', blank=True,null=True)
-    size = models.CharField(max_length=2, choices=SIZE_CHOICES, blank=True)
-    color = models.CharField(max_length=20, choices=COLOR_CHOICES, blank=True)
+    size = models.CharField(max_length=2, choices=SIZE_CHOICES)
+    color = models.CharField(max_length=20, choices=COLOR_CHOICES)
     stock = models.PositiveIntegerField(default=0)
     is_available = models.BooleanField(default=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
@@ -53,8 +56,12 @@ class Product(models.Model):
             slug = f"{base_slug}-{counter}"
         return slug
 
+    def variants(self):
+        return Product.objects.filter(product_name=self.product_name, is_available=True)
+
     class Meta:
         verbose_name_plural = "Products"
+        unique_together = ('product_name', 'size', 'color')
 
 
 class Review(models.Model):
@@ -68,3 +75,12 @@ class Review(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+class Tax(models.Model):
+    tax_value = models.DecimalField(max_digits=10, decimal_places=2)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.tax_value}"

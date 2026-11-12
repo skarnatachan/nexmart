@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Your Cart - Nexmart{% endblock title %}
+{% block content %}
+    <section class="py-4 antialiased md:py-8">
+        <div class="mx-auto max-w-screen-xl px-4">
+            <h1 class="mb-6 text-2xl font-bold text-heading">Your Cart</h1>
+            {% if cart_items %}
+                <div class="overflow-x-auto rounded-base border border-default">
+                    <table class="w-full text-left text-sm text-body">
+                        <thead class="bg-neutral-secondary-medium text-xs uppercase text-heading">
+                            <tr>
+                                <th scope="col" class="px-4 py-3">Product</th>
+                                <th scope="col" class="px-4 py-3">Price</th>
+                                <th scope="col" class="px-4 py-3">Quantity</th>
+                                <th scope="col" class="px-4 py-3">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in cart_items %}
+                                <tr class="border-t border-default bg-neutral-primary-soft">
+                                    <td class="flex items-center gap-3 px-4 py-3">
+                                        {% if item.product.product_image %}
+                                            <img src="{{ item.product.product_image.url }}" alt="{{ item.product.product_name }}"
+                                                 class="h-10 w-10 shrink-0 rounded-base border border-default object-cover"/>
+                                        {% endif %}
+                                        <div>
+                                            <a href="{% url 'products_detail' item.product.category.slug item.product.slug %}"
+                                               class="font-medium text-heading hover:text-fg-brand">{{ item.product.product_name }}</a>
+                                            <p class="text-xs text-body-subtle">{{ item.size }} · {{ item.color|title }}</p>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">$ {{ item.product.price }}</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center gap-2">
+                                            <form method="post" action="{% url 'remove_cart' item.product.id %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="next" value="{{ request.path }}">
+                                                <button type="submit" aria-label="Decrease quantity" class="btn-secondary cursor-pointer px-2.5 py-1">-</button>
+                                            </form>
+                                            <span class="w-6 text-center text-heading">{{ item.quantity }}</span>
+                                            <form method="post" action="{% url 'add_cart' item.product.id %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="next" value="{{ request.path }}">
+                                                <button type="submit" aria-label="Increase quantity" class="btn-secondary cursor-pointer px-2.5 py-1">+</button>
+                                            </form>
+                                            <form method="post" action="{% url 'remove_cart_item' item.product.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" aria-label="Remove item"
+                                                        class="ms-2 flex cursor-pointer items-center gap-1 text-fg-danger hover:text-fg-danger-strong">
+                                                    <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                              d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                                                    </svg>
+                                                    <span class="text-xs">Remove</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 font-semibold text-heading">$ {{ item.sub_total }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <div class="w-full max-w-xs rounded-base border border-default bg-neutral-primary-soft p-4">
+                        <div class="flex items-center justify-between text-body">
+                            <span>Subtotal</span>
+                            <span>$ {{ subtotal }}</span>
+                        </div>
+                        {% for row in taxes %}
+                            <div class="mt-2 flex items-center justify-between text-body">
+                                <span>Tax ({{ row.tax.tax_value }}%)</span>
+                                <span>$ {{ row.amount }}</span>
+                            </div>
+                        {% endfor %}
+                        <div class="mt-2 flex items-center justify-between border-t border-default pt-2 text-heading">
+                            <span class="font-semibold">Total</span>
+                            <span class="font-semibold">$ {{ total }}</span>
+                        </div>
+                        <a href="#" class="btn-primary mt-4 block w-full text-center">Proceed to Checkout</a>
+                    </div>
+                </div>
+            {% else %}
+                <p class="text-body">Your cart is empty. <a href="{% url 'store' %}" class="link">Continue shopping</a>.</p>
+            {% endif %}
+        </div>
+    </section>
+{% endblock content %}

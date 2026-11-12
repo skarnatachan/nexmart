@@ -22,14 +22,22 @@
                     <div class="mt-6">
                         <h2 class="label">Color</h2>
                         <div class="flex flex-wrap gap-2">
-                            {% for value, label in colors %}
-                                <label class="cursor-pointer">
-                                    <input type="radio" name="color" value="{{ value }}"
-                                           {% if product.color == value %}checked{% endif %} class="peer sr-only"/>
-                                    <span class="inline-flex items-center rounded-base border border-default-medium bg-neutral-secondary-medium px-3 py-1.5 text-sm text-body peer-checked:border-brand peer-checked:bg-brand-softer peer-checked:text-fg-brand-strong">
+                            {% for value, label, variant in color_links %}
+                                {% if value == product.color %}
+                                    <span class="inline-flex items-center rounded-base border border-brand bg-brand-softer px-3 py-1.5 text-sm text-fg-brand-strong">
                                         {{ label }}
                                     </span>
-                                </label>
+                                {% elif variant %}
+                                    <a href="{% url 'products_detail' variant.category.slug variant.slug %}"
+                                       class="inline-flex items-center rounded-base border border-default-medium bg-neutral-secondary-medium px-3 py-1.5 text-sm text-body hover:border-brand hover:text-fg-brand">
+                                        {{ label }}
+                                    </a>
+                                {% else %}
+                                    <span class="inline-flex items-center rounded-base border border-default-medium bg-neutral-secondary-medium px-3 py-1.5 text-sm text-body-subtle opacity-40"
+                                          title="Not available in this size">
+                                        {{ label }}
+                                    </span>
+                                {% endif %}
                             {% endfor %}
                         </div>
                     </div>
@@ -37,14 +45,22 @@
                     <div class="mt-6">
                         <h2 class="label">Size</h2>
                         <div class="flex flex-wrap gap-2">
-                            {% for value, label in sizes %}
-                                <label class="cursor-pointer">
-                                    <input type="radio" name="size" value="{{ value }}"
-                                           {% if product.size == value %}checked{% endif %} class="peer sr-only"/>
-                                    <span class="inline-flex items-center rounded-base border border-default-medium bg-neutral-secondary-medium px-3 py-1.5 text-sm text-body peer-checked:border-brand peer-checked:bg-brand-softer peer-checked:text-fg-brand-strong">
+                            {% for value, label, variant in size_links %}
+                                {% if value == product.size %}
+                                    <span class="inline-flex items-center rounded-base border border-brand bg-brand-softer px-3 py-1.5 text-sm text-fg-brand-strong">
                                         {{ label }}
                                     </span>
-                                </label>
+                                {% elif variant %}
+                                    <a href="{% url 'products_detail' variant.category.slug variant.slug %}"
+                                       class="inline-flex items-center rounded-base border border-default-medium bg-neutral-secondary-medium px-3 py-1.5 text-sm text-body hover:border-brand hover:text-fg-brand">
+                                        {{ label }}
+                                    </a>
+                                {% else %}
+                                    <span class="inline-flex items-center rounded-base border border-default-medium bg-neutral-secondary-medium px-3 py-1.5 text-sm text-body-subtle opacity-40"
+                                          title="Not available in this color">
+                                        {{ label }}
+                                    </span>
+                                {% endif %}
                             {% endfor %}
                         </div>
                     </div>
@@ -57,14 +73,33 @@
                             </svg>
                             Out of Stock
                         </button>
+                    {% elif cart_quantity > 0 %}
+                        <div class="mt-8 flex items-center gap-3">
+                            <form method="post" action="{% url 'remove_cart' product.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.path }}">
+                                <button type="submit" aria-label="Decrease quantity" class="btn-secondary cursor-pointer px-3 py-2">-</button>
+                            </form>
+                            <span class="w-8 text-center text-lg font-semibold text-heading">{{ cart_quantity }}</span>
+                            <form method="post" action="{% url 'add_cart' product.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.path }}">
+                                <button type="submit" aria-label="Increase quantity" class="btn-secondary cursor-pointer px-3 py-2">+</button>
+                            </form>
+                            <span class="text-sm text-body-subtle">in cart</span>
+                        </div>
                     {% else %}
-                        <button type="button" class="btn-primary mt-8 w-full sm:w-auto sm:px-8">
-                            <svg class="me-2 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M3 3h2l.4 2M7 13h10l3-8H5.4M7 13 5.4 5M7 13l-2.293 2.293A1 1 0 0 0 5 17h12m-6 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm-6 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"/>
-                            </svg>
-                            Add to Cart
-                        </button>
+                        <form method="post" action="{% url 'add_cart' product.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            <button type="submit" class="btn-primary cursor-pointer mt-8 w-full sm:w-auto sm:px-8">
+                                <svg class="me-2 h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M3 3h2l.4 2M7 13h10l3-8H5.4M7 13 5.4 5M7 13l-2.293 2.293A1 1 0 0 0 5 17h12m-6 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm-6 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"/>
+                                </svg>
+                                Add to Cart
+                            </button>
+                        </form>
                     {% endif %}
                 </div>
             </div>
