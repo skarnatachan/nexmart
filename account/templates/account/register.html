@@ -4,7 +4,10 @@
     <section class="py-4 antialiased md:py-8">
         <div class="mx-auto max-w-md px-4">
             <div class="rounded-base border border-default bg-neutral-primary-soft p-6">
-                <h1 class="mb-6 text-2xl font-bold text-heading">Create your account</h1>
+                <h1 class="mb-2 text-2xl font-bold text-heading">Create your account</h1>
+                <p class="mb-6 text-sm text-body">
+                    We'll email you a link to activate your account before you can log in.
+                </p>
                 <form method="post" novalidate>
                     {% csrf_token %}
                     {% if form.non_field_errors %}

@@ -27,7 +27,9 @@
     {% if messages %}
         <div class="mb-6 space-y-3">
             {% for message in messages %}
-                {% include "partials/alert.html" with id=forloop.counter %}
+                {% if 'logout-modal' not in message.tags %}
+                    {% include "partials/alert.html" with id=forloop.counter %}
+                {% endif %}
             {% endfor %}
         </div>
     {% endif %}
@@ -35,12 +37,43 @@
 </main>
 {% include "partials/footer.html" %}
 
+{% for message in messages %}
+    {% if 'logout-modal' in message.tags %}
+        <div id="logout-modal" tabindex="-1" aria-hidden="true"
+             class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
+            <div class="relative max-h-full w-full max-w-md p-4">
+                <div class="relative rounded-base border border-default bg-neutral-primary-soft shadow">
+                    <button type="button"
+                            class="absolute right-2.5 top-3 ms-auto inline-flex h-8 w-8 items-center justify-center rounded-base text-body-subtle hover:bg-neutral-secondary-medium"
+                            data-modal-hide="logout-modal">
+                        <svg class="h-3 w-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M1 1l6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                        </svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                    <div class="p-4 text-center md:p-5">
+                        <svg class="mx-auto mb-4 h-12 w-12 text-fg-success" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                             viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                        </svg>
+                        <h3 class="mb-5 text-lg font-normal text-heading">{{ message }}</h3>
+                        <button type="button" class="btn-primary cursor-pointer" data-modal-hide="logout-modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endfor %}
+
 {% block modals %}{% endblock %}
 {# Flowbite's JS wires up every data-* attribute above (copied from node_modules by `npm run build:js`). #}
 <script src="{% static 'css/flowbite/flowbite.min.js' %}"></script>
 <script src="{% static 'js/theme-toggle.js' %}"></script>
 <script src="{% static 'js/password-toggle.js' %}"></script>
 <script src="{% static 'js/messages.js' %}"></script>
+<script src="{% static 'js/logout-modal.js' %}"></script>
 <script src="{% static 'js/photo-preview.js' %}"></script>
 {% block extra_js %}{% endblock %}
 </body>

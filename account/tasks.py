@@ -14,6 +14,17 @@ def _send_html_email(subject, html_template, text_template, context, to_email):
 
 
 @shared_task
+def send_activation_email(context, to_email):
+    _send_html_email(
+        'Activate your Nexmart account',
+        'account/email/activation_email.html',
+        'account/email/activation_email.txt',
+        context,
+        to_email,
+    )
+
+
+@shared_task
 def send_welcome_email(context, to_email):
     _send_html_email(
         'Welcome to Nexmart - account confirmation',

@@ -1,0 +1,16 @@
+{% extends 'account/email/_base_email.html' %}
+{% block email_title %}Activate your account{% endblock %}
+{% block email_body %}
+    <h1 style="font-size:20px; margin:0 0 16px; color:#111827;">Activate your account</h1>
+    <p style="margin:0 0 16px;">
+        Hi {{ full_name }}, thanks for signing up for Nexmart. Please confirm your email address to activate
+        your account.
+    </p>
+    <p style="margin:0 0 24px;">
+        <a href="{{ activation_url }}"
+           style="display:inline-block; background-color:#1d4ed8; color:#ffffff; text-decoration:none; padding:12px 24px; border-radius:6px; font-weight:bold;">
+            Activate my account
+        </a>
+    </p>
+    <p style="margin:0; color:#6b7280; font-size:12px;">If you didn't create this account, you can safely ignore this email.</p>
+{% endblock %}

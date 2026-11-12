@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Check Your Email - Nexmart{% endblock title %}
+{% block content %}
+    <section class="py-4 antialiased md:py-8">
+        <div class="mx-auto max-w-md px-4">
+            <div class="rounded-base border border-default bg-neutral-primary-soft p-6 text-center">
+                <h1 class="mb-2 text-2xl font-bold text-heading">Check your email</h1>
+                <p class="text-body">
+                    If an account can be activated for the email you provided, we've sent a link to activate it.
+                </p>
+                <a href="{% url 'login' %}" class="btn-primary mt-6 inline-block">Back to log in</a>
+            </div>
+        </div>
+    </section>
+{% endblock content %}

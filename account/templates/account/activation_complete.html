@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Account Activation - Nexmart{% endblock title %}
+{% block content %}
+    <section class="py-4 antialiased md:py-8">
+        <div class="mx-auto max-w-md px-4">
+            <div class="rounded-base border border-default bg-neutral-primary-soft p-6 text-center">
+                {% if activated %}
+                    <h1 class="mb-2 text-2xl font-bold text-heading">Account activated</h1>
+                    <p class="text-body">Your account is now active. You can log in and start shopping.</p>
+                    <a href="{% url 'login' %}" class="btn-primary mt-6 inline-block">Log in</a>
+                {% else %}
+                    <h1 class="mb-2 text-2xl font-bold text-heading">Activation link invalid</h1>
+                    <p class="text-body">
+                        This activation link is invalid or has expired, possibly because it has already been used.
+                    </p>
+                    <a href="{% url 'resend_activation' %}" class="btn-primary mt-6 inline-block">Request a new link</a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+{% endblock content %}

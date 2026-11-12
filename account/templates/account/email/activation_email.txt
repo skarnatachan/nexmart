@@ -1,0 +1,7 @@
+Hi {{ full_name }},
+
+Thanks for signing up for Nexmart. Please confirm your email address to activate your account:
+
+{{ activation_url }}
+
+If you didn't create this account, you can safely ignore this email.

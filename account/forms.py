@@ -1,10 +1,13 @@
 from datetime import date
 
 from django import forms
+from django.contrib.auth import authenticate
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.core.exceptions import ValidationError
 from django.template.loader import render_to_string
 from django.templatetags.static import static
+from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 from .models import User, UserProfile
 
@@ -50,6 +53,7 @@ class RegistrationForm(StyledFormMixin, forms.ModelForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data['password'])
+        user.is_active = False
         if commit:
             user.save()
         return user
@@ -57,6 +61,31 @@ class RegistrationForm(StyledFormMixin, forms.ModelForm):
 
 class EmailAuthenticationForm(StyledFormMixin, AuthenticationForm):
     username = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'autofocus': True}))
+
+    def clean(self):
+        email = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+        if email and password:
+            self.user_cache = authenticate(self.request, username=email, password=password)
+            if self.user_cache is None:
+                existing = User.objects.filter(email__iexact=email).first()
+                if existing and not existing.is_active and existing.check_password(password):
+                    raise ValidationError(
+                        mark_safe(
+                            'Your account is not active yet. Please check your email for the '
+                            'activation link, or <a href="%s" class="link">request a new one</a>.'
+                            % reverse('resend_activation')
+                        ),
+                        code='inactive',
+                    )
+                raise self.get_invalid_login_error()
+            else:
+                self.confirm_login_allowed(self.user_cache)
+        return self.cleaned_data
+
+
+class ResendActivationForm(StyledFormMixin, forms.Form):
+    email = forms.EmailField(label='Email', widget=forms.EmailInput(attrs={'autofocus': True}))
 
 
 class CustomPasswordResetForm(StyledFormMixin, PasswordResetForm):

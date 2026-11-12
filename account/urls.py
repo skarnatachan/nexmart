@@ -1,4 +1,3 @@
-from django.contrib.auth.views import LogoutView
 from django.urls import path
 
 from . import views
@@ -6,8 +5,12 @@ from . import views
 urlpatterns = [
     path('register/', views.register, name='register'),
     path('login/', views.EmailLoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(), name='logout'),
+    path('logout/', views.CustomLogoutView.as_view(), name='logout'),
     path('profile/', views.profile, name='profile'),
+
+    path('activate/sent/', views.activation_sent, name='activation_sent'),
+    path('activate/resend/', views.resend_activation, name='resend_activation'),
+    path('activate/<uidb64>/<token>/', views.activate, name='activate'),
 
     path('password-change/', views.CustomPasswordChangeView.as_view(), name='password_change'),
     path('password-change/done/', views.CustomPasswordChangeDoneView.as_view(), name='password_change_done'),
