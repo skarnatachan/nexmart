@@ -1,8 +1,13 @@
 from decimal import Decimal, InvalidOperation
+from django.core.paginator import Paginator
+from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
-from .models import Product, Review
+from .forms import ProductSearchForm
+from .models import Color, Product, Review, Size
 from category.models import Category
 from carts.models import Cart
+
+PRODUCTS_PER_PAGE = 8
 
 def _one_per_product_name(products_qs):
     """Collapse variant rows sharing a product_name into a single representative,
@@ -21,16 +26,16 @@ def _best_variant(matches):
 
 def _variant_links(product, variants):
     color_links = []
-    for value, label in Product.COLOR_CHOICES:
-        matches = [v for v in variants if v.color == value]
-        same_size = [v for v in matches if v.size == product.size]
-        color_links.append((value, label, _best_variant(same_size) or _best_variant(matches)))
+    for color in Color.objects.all():
+        matches = [v for v in variants if v.color_id == color.id]
+        same_size = [v for v in matches if v.size_id == product.size_id]
+        color_links.append((color, _best_variant(same_size) or _best_variant(matches)))
 
     size_links = []
-    for value, label in Product.SIZE_CHOICES:
-        matches = [v for v in variants if v.size == value]
-        same_color = [v for v in matches if v.color == product.color]
-        size_links.append((value, label, _best_variant(same_color) or _best_variant(matches)))
+    for size in Size.objects.all():
+        matches = [v for v in variants if v.size_id == size.id]
+        same_color = [v for v in matches if v.color_id == product.color_id]
+        size_links.append((size, _best_variant(same_color) or _best_variant(matches)))
 
     return color_links, size_links
 
@@ -44,11 +49,14 @@ def _cart_quantities(request):
     return dict(cart_obj.items.filter(is_active=True).values_list('product_id', 'quantity'))
 
 def home(request):
-    products = _one_per_product_name(Product.objects.filter(is_available=True))
+    products = _one_per_product_name(Product.objects.filter(is_available=True).select_related('category', 'size', 'color'))
     quantities = _cart_quantities(request)
     for product in products:
         product.cart_quantity = quantities.get(product.id, 0)
-    context = {'products': products}
+
+    page_obj = Paginator(products, PRODUCTS_PER_PAGE).get_page(request.GET.get('page'))
+
+    context = {'products': page_obj, 'page_obj': page_obj}
     return render(request, 'store/home.html', context)
 
 def _parse_price(raw):
@@ -60,7 +68,14 @@ def _parse_price(raw):
         return None
 
 def store(request, category_slug=None):
-    products = Product.objects.filter(is_available=True)
+    products = Product.objects.filter(is_available=True).select_related('category', 'size', 'color')
+
+    search_form = ProductSearchForm(request.GET)
+    search_query = search_form.cleaned_data.get('q', '') if search_form.is_valid() else ''
+    if search_query:
+        products = products.filter(
+            Q(product_name__icontains=search_query) | Q(description__icontains=search_query)
+        )
 
     category = None
     if category_slug:
@@ -83,28 +98,34 @@ def store(request, category_slug=None):
 
     selected_sizes = request.GET.getlist('size')
     if selected_sizes:
-        products = products.filter(size__in=selected_sizes)
+        products = products.filter(size__code__in=selected_sizes)
 
     representatives = _one_per_product_name(products)
     quantities = _cart_quantities(request)
     for rep in representatives:
         rep.cart_quantity = quantities.get(rep.id, 0)
 
+    page_obj = Paginator(representatives, PRODUCTS_PER_PAGE).get_page(request.GET.get('page'))
+
     categories = Category.objects.all()
     context = {
-        'products': representatives,
+        'products': page_obj,
+        'page_obj': page_obj,
         'categories': categories,
+        'sizes': Size.objects.all(),
         'category': category,
         'selected_categories': selected_categories,
         'selected_sizes': selected_sizes,
         'price_min': price_min_raw,
         'price_max': price_max_raw,
+        'search_query': search_query,
     }
     return render(request, 'store/store.html', context)
 
 def product_detail(request, category_slug=None, product_slug=None):
     product = get_object_or_404(
-        Product, slug=product_slug, category__slug=category_slug, is_available=True
+        Product.objects.select_related('category', 'size', 'color'),
+        slug=product_slug, category__slug=category_slug, is_available=True,
     )
     reviews = product.reviews.all()
     variants = [v for v in product.variants() if v.stock > 0]

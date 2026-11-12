@@ -1,10 +1,16 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User
+from .models import User, UserProfile
+
+
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
 
 
 class CustomUserAdmin(UserAdmin):
     model = User
+    inlines = (UserProfileInline,)
     list_display = ('email', 'username', 'first_name', 'last_name', 'date_joined', 'last_login', 'is_active')
     list_display_links = ('email', 'first_name', 'last_name')
     list_filter = ('is_active', 'is_staff', 'is_superuser')
@@ -15,7 +21,7 @@ class CustomUserAdmin(UserAdmin):
 
     fieldsets = (
         (None, {'fields': ('email', 'username', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'phone_number')}),
+        ('Personal info', {'fields': ('first_name', 'last_name')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'is_admin')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )

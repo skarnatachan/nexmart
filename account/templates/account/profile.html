@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block title %}My Account - Nexmart{% endblock title %}
+{% block content %}
+    <section class="py-4 antialiased md:py-8">
+        <div class="mx-auto max-w-2xl px-4">
+            <h1 class="mb-6 text-2xl font-bold text-heading">My Account</h1>
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-6 rounded-base border border-default bg-neutral-primary-soft p-6">
+                    <h2 class="mb-4 text-lg font-semibold text-heading">Personal information</h2>
+                    {% if user_form.non_field_errors %}
+                        <div class="mb-4 rounded-base border border-danger-subtle bg-danger-soft p-3 text-sm text-fg-danger-strong">
+                            {{ user_form.non_field_errors }}
+                        </div>
+                    {% endif %}
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="mb-4">
+                            <label for="{{ user_form.first_name.id_for_label }}" class="label">
+                                {{ user_form.first_name.label }} <span class="text-fg-danger">*</span>
+                            </label>
+                            {{ user_form.first_name }}
+                            {% for error in user_form.first_name.errors %}
+                                <p class="helper-text text-fg-danger">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-4">
+                            <label for="{{ user_form.last_name.id_for_label }}" class="label">
+                                {{ user_form.last_name.label }} <span class="text-fg-danger">*</span>
+                            </label>
+                            {{ user_form.last_name }}
+                            {% for error in user_form.last_name.errors %}
+                                <p class="helper-text text-fg-danger">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-4">
+                            <label for="{{ user_form.username.id_for_label }}" class="label">
+                                {{ user_form.username.label }} <span class="text-fg-danger">*</span>
+                            </label>
+                            {{ user_form.username }}
+                            {% for error in user_form.username.errors %}
+                                <p class="helper-text text-fg-danger">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-4">
+                            <label for="{{ user_form.email.id_for_label }}" class="label">
+                                {{ user_form.email.label }} <span class="text-fg-danger">*</span>
+                            </label>
+                            {{ user_form.email }}
+                            {% for error in user_form.email.errors %}
+                                <p class="helper-text text-fg-danger">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6 rounded-base border border-default bg-neutral-primary-soft p-6">
+                    <h2 class="mb-4 text-lg font-semibold text-heading">Profile details</h2>
+                    {% if profile_form.non_field_errors %}
+                        <div class="mb-4 rounded-base border border-danger-subtle bg-danger-soft p-3 text-sm text-fg-danger-strong">
+                            {{ profile_form.non_field_errors }}
+                        </div>
+                    {% endif %}
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="mb-4">
+                            <label for="{{ profile_form.date_of_birth.id_for_label }}" class="label">
+                                {{ profile_form.date_of_birth.label }}
+                            </label>
+                            {{ profile_form.date_of_birth }}
+                            {% for error in profile_form.date_of_birth.errors %}
+                                <p class="helper-text text-fg-danger">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-4">
+                            <label for="{{ profile_form.gender.id_for_label }}" class="label">
+                                {{ profile_form.gender.label }}
+                            </label>
+                            {{ profile_form.gender }}
+                            {% for error in profile_form.gender.errors %}
+                                <p class="helper-text text-fg-danger">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-4 sm:col-span-2">
+                            <label for="{{ profile_form.shipping_address.id_for_label }}" class="label">
+                                {{ profile_form.shipping_address.label }}
+                            </label>
+                            {{ profile_form.shipping_address }}
+                            {% for error in profile_form.shipping_address.errors %}
+                                <p class="helper-text text-fg-danger">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-4">
+                            <label for="{{ profile_form.phone_number.id_for_label }}" class="label">
+                                {{ profile_form.phone_number.label }}
+                            </label>
+                            {{ profile_form.phone_number }}
+                            {% for error in profile_form.phone_number.errors %}
+                                <p class="helper-text text-fg-danger">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-4">
+                            <label for="{{ profile_form.shipping_city.id_for_label }}" class="label">
+                                {{ profile_form.shipping_city.label }}
+                            </label>
+                            {{ profile_form.shipping_city }}
+                            {% for error in profile_form.shipping_city.errors %}
+                                <p class="helper-text text-fg-danger">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-4">
+                            <label for="{{ profile_form.shipping_country.id_for_label }}" class="label">
+                                {{ profile_form.shipping_country.label }}
+                            </label>
+                            {{ profile_form.shipping_country }}
+                            {% for error in profile_form.shipping_country.errors %}
+                                <p class="helper-text text-fg-danger">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-4">
+                            <label for="{{ profile_form.shipping_zip_code.id_for_label }}" class="label">
+                                {{ profile_form.shipping_zip_code.label }}
+                            </label>
+                            {{ profile_form.shipping_zip_code }}
+                            {% for error in profile_form.shipping_zip_code.errors %}
+                                <p class="helper-text text-fg-danger">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <a href="{% url 'password_change' %}" class="link text-sm">Change password</a>
+                    <button type="submit" class="btn-primary cursor-pointer">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </section>
+{% endblock content %}

@@ -1,0 +1,5 @@
+Welcome, {{ full_name }}!
+
+Thanks for creating an account with Nexmart using the email {{ email }}.
+
+Visit {{ site_url }} to start shopping.

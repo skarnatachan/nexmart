@@ -1,0 +1,16 @@
+{% extends 'account/email/_base_email.html' %}
+{% block email_title %}Welcome to Nexmart{% endblock %}
+{% block email_body %}
+    <h1 style="font-size:20px; margin:0 0 16px; color:#111827;">Welcome, {{ full_name }}!</h1>
+    <p style="margin:0 0 16px;">
+        Thanks for creating an account with Nexmart. Your account has been successfully registered with the email
+        <strong>{{ email }}</strong>.
+    </p>
+    <p style="margin:0 0 24px;">You can now sign in and start shopping right away.</p>
+    <p style="margin:0;">
+        <a href="{{ site_url }}"
+           style="display:inline-block; background-color:#1d4ed8; color:#ffffff; text-decoration:none; padding:12px 24px; border-radius:6px; font-weight:bold;">
+            Visit Nexmart
+        </a>
+    </p>
+{% endblock %}

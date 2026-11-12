@@ -3,26 +3,31 @@ from category.models import Category
 from django.utils.text import slugify
 
 
+class Size(models.Model):
+    code = models.CharField(max_length=10, unique=True)
+    label = models.CharField(max_length=50)
+    display_order = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return self.label
+
+    class Meta:
+        ordering = ['display_order', 'id']
+
+
+class Color(models.Model):
+    code = models.CharField(max_length=20, unique=True)
+    label = models.CharField(max_length=50)
+    display_order = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return self.label
+
+    class Meta:
+        ordering = ['display_order', 'id']
+
+
 class Product(models.Model):
-    SIZE_SMALL = "S"
-    SIZE_MEDIUM = "M"
-    SIZE_LARGE = "L"
-    SIZE_EXTRA_LARGE = "XL"
-    SIZE_CHOICES = [
-        (SIZE_SMALL, "Small"),
-        (SIZE_MEDIUM, "Medium"),
-        (SIZE_LARGE, "Large"),
-        (SIZE_EXTRA_LARGE, "Extra Large"),
-    ]
-
-    COLOR_CHOICES = [
-        ("black", "Black"),
-        ("white", "White"),
-        ("gray", "Gray"),
-        ("navy", "Navy"),
-        ("red", "Red"),
-    ]
-
     product_name = models.CharField(max_length=200)
     slug = models.SlugField(
         max_length=200, unique=True, blank=True,
@@ -31,8 +36,8 @@ class Product(models.Model):
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     product_image = models.ImageField(upload_to='images/products', blank=True,null=True)
-    size = models.CharField(max_length=2, choices=SIZE_CHOICES)
-    color = models.CharField(max_length=20, choices=COLOR_CHOICES)
+    size = models.ForeignKey(Size, on_delete=models.PROTECT, related_name='products')
+    color = models.ForeignKey(Color, on_delete=models.PROTECT, related_name='products')
     stock = models.PositiveIntegerField(default=0)
     is_available = models.BooleanField(default=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
@@ -57,7 +62,9 @@ class Product(models.Model):
         return slug
 
     def variants(self):
-        return Product.objects.filter(product_name=self.product_name, is_available=True)
+        return Product.objects.filter(
+            product_name=self.product_name, is_available=True
+        ).select_related('category', 'size', 'color')
 
     class Meta:
         verbose_name_plural = "Products"

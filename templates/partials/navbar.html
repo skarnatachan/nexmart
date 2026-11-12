@@ -1,28 +1,8 @@
 {% load static %}
+{% load humanize %}
 <nav class="bg-white dark:bg-gray-800 antialiased">
-    <div class="max-w-screen-xl px-4 mx-auto 2xl:px-0">
+    <div class="max-w-7xl px-4 mx-auto 2xl:px-0">
         <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
-            <form action="#" class="hidden md:block">
-                <label for="" class="sr-only">
-                    Search
-                </label>
-                <div class="relative z-0 w-full group">
-                    <div class="absolute inset-y-0 flex items-center pointer-events-none start-0">
-                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
-                             xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-width="2"
-                                  d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
-                        </svg>
-                    </div>
-
-                    <input type="email" name="floating_email" id="floating_email"
-                           class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0  appearance-none dark:text-white ps-6  focus:outline-none focus:ring-0 peer"
-                           placeholder=" " required/>
-                    <label for="floating_email"
-                           class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-2.5 ps-6 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Search</label>
-                </div>
-            </form>
-
             <div class="shrink-0">
                 <a href="{% url 'home' %}" title="Nexmart" class="">
                     <img class="block w-auto h-8 dark:hidden" src="{% static 'img/logo/nexmart-logo.svg' %}"
@@ -70,7 +50,7 @@
                     </div>
                 </div>
                 <button id="cartDropdownButton1" data-dropdown-toggle="cartDropdown1" type="button"
-                        class="inline-flex items-center justify-center p-2 hover:bg-neutral-secondary-medium rounded-lg text-sm font-medium leading-none text-heading">
+                        class="inline-flex cursor-pointer items-center justify-center p-2 hover:bg-neutral-secondary-medium rounded-lg text-sm font-medium leading-none text-heading">
           <span class="sr-only">
             Cart
           </span>
@@ -86,7 +66,7 @@
                             </div>
                         {% endif %}
                     </div>
-                    <span class="hidden sm:flex">$ {{ nav_cart_total }}</span>
+                    <span class="hidden sm:flex">$ {{ nav_cart_total|intcomma }}</span>
                     <svg class="hidden sm:flex w-4 h-4 text-heading ms-1" aria-hidden="true"
                          xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -94,69 +74,76 @@
                     </svg>
                 </button>
                 <div id="cartDropdown1"
-                     class="z-10 hidden mx-auto w-[360px] space-y-4 overflow-hidden rounded-base border border-default bg-neutral-primary-medium p-4 antialiased shadow-lg">
+                     class="z-10 hidden mx-auto w-[28rem] max-w-[90vw] space-y-4 overflow-hidden rounded-base border border-default bg-neutral-primary-medium p-4 antialiased shadow-lg">
                     <dl class="flex items-center justify-between gap-4 border-b border-default pb-4">
                         <dt class="font-semibold leading-none text-heading">Your shopping cart</dt>
                         <dd class="leading-none text-body">{{ nav_cart_count }} item{{ nav_cart_count|pluralize }}</dd>
                     </dl>
 
                     {% for item in nav_cart_items %}
-                        <div class="grid grid-cols-4 items-center justify-between gap-3">
-                            <div class="col-span-2 flex items-center gap-2">
+                        <div class="grid grid-cols-12 items-center gap-3">
+                            <div class="col-span-5 flex min-w-0 items-center gap-2">
                                 <a href="{% url 'products_detail' item.product.category.slug item.product.slug %}"
-                                   class="flex aspect-square h-9 w-9 shrink-0 items-center">
+                                   class="flex aspect-square h-10 w-10 shrink-0 items-center">
                                     {% if item.product.product_image %}
                                         <img class="h-auto max-h-full w-full rounded-base object-cover"
                                              src="{{ item.product.product_image.url }}"
                                              alt="{{ item.product.product_name }}"/>
                                     {% endif %}
                                 </a>
-                                <div class="flex-1">
+                                <div class="min-w-0 flex-1">
                                     <a href="{% url 'products_detail' item.product.category.slug item.product.slug %}"
-                                       class="truncate text-sm font-semibold leading-none text-heading hover:underline">{{ item.product.product_name }}</a>
-                                    <p class="truncate text-xs text-body-subtle">{{ item.size }} · {{ item.color|title }}</p>
+                                       class="block truncate text-sm font-semibold leading-none text-heading hover:underline">{{ item.product.product_name }}</a>
+                                    <p class="truncate text-xs text-body-subtle">Color: {{ item.color|title }} · Size: {{ item.size }}</p>
                                 </div>
                             </div>
 
-                            <div class="flex items-center justify-center gap-1">
+                            <div class="col-span-4 flex items-center justify-center gap-1.5">
                                 <form method="post" action="{% url 'remove_cart' item.product.id %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="next" value="{{ request.path }}">
-                                    <button type="submit" aria-label="Decrease quantity" class="btn-secondary cursor-pointer px-1.5 py-0.5 text-xs">-</button>
+                                    <button type="submit" aria-label="Decrease quantity"
+                                            class="btn-secondary cursor-pointer px-2 py-1 text-xs">-
+                                    </button>
                                 </form>
-                                <span class="w-5 text-center text-sm leading-none text-heading">{{ item.quantity }}</span>
+                                <span class="w-6 text-center text-sm leading-none text-heading">{{ item.quantity }}</span>
                                 <form method="post" action="{% url 'add_cart' item.product.id %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="next" value="{{ request.path }}">
-                                    <button type="submit" aria-label="Increase quantity" class="btn-secondary cursor-pointer px-1.5 py-0.5 text-xs">+</button>
+                                    <button type="submit" aria-label="Increase quantity"
+                                            class="btn-secondary cursor-pointer px-2 py-1 text-xs">+
+                                    </button>
                                 </form>
                             </div>
 
-                            <div class="flex items-center justify-end gap-2">
-                                <p class="text-sm font-semibold leading-none text-heading">$ {{ item.sub_total }}</p>
-                                <form method="post" action="{% url 'remove_cart_item' item.product.id %}">
+                            <div class="col-span-3 flex items-center justify-end gap-2">
+                                <p class="whitespace-nowrap text-sm font-semibold leading-none text-heading">
+                                    $ {{ item.sub_total|intcomma }}</p>
+                                <form method="post" action="{% url 'remove_cart_item' item.product.id %}"
+                                      id="nav-remove-item-form-{{ item.product.id }}">
                                     {% csrf_token %}
                                     <input type="hidden" name="next" value="{{ request.path }}">
-                                    <button type="submit" class="text-fg-danger hover:text-fg-danger-strong">
-                                        <span class="sr-only"> Remove </span>
-                                        <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                             width="24"
-                                             height="24" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                                  stroke-width="2"
-                                                  d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-                                        </svg>
-                                    </button>
                                 </form>
+                                <button type="button" class="shrink-0 text-fg-danger hover:text-fg-danger-strong"
+                                        data-modal-target="nav-remove-item-modal-{{ item.product.id }}"
+                                        data-modal-toggle="nav-remove-item-modal-{{ item.product.id }}">
+                                    <span class="sr-only"> Remove </span>
+                                    <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                         width="24"
+                                         height="24" fill="none" viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                              stroke-width="2"
+                                              d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     {% empty %}
                         <p class="text-sm text-body">Your cart is empty.</p>
                     {% endfor %}
-
                     <dl class="flex items-center justify-between border-t border-default pt-4">
                         <dt class="leading-none text-body">Subtotal</dt>
-                        <dd class="leading-none text-body">$ {{ nav_subtotal }}</dd>
+                        <dd class="leading-none text-body">$ {{ nav_subtotal|intcomma }}</dd>
                     </dl>
                     {% for row in nav_taxes %}
                         <dl class="mt-2 flex items-center justify-between">
@@ -166,12 +153,12 @@
                     {% endfor %}
                     <dl class="mt-2 flex items-center justify-between border-t border-default pt-2">
                         <dt class="font-semibold leading-none text-heading">Total</dt>
-                        <dd class="font-semibold leading-none text-heading">$ {{ nav_cart_total }}</dd>
+                        <dd class="font-semibold leading-none text-heading">$ {{ nav_cart_total|intcomma }}</dd>
                     </dl>
-
                     <a href="{% url 'cart' %}" title="" class="btn-primary mb-2 me-2 w-full px-5" role="button"> See
                         your cart </a>
                 </div>
+                {% if request.user.is_authenticated %}
                 <button id="accountDropdownButton1" data-dropdown-toggle="accountDropdown1" type="button"
                         class="inline-flex items-center justify-center p-2 hover:bg-gray-100 rounded-lg text-sm font-medium leading-none text-gray-900 dark:text-white dark:hover:bg-gray-700">
                     <svg class="w-5 h-5 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -190,23 +177,22 @@
                 <div id="accountDropdown1"
                      class="z-50 hidden w-60 divide-y divide-gray-100 overflow-hidden overflow-y-auto rounded-lg bg-white antialiased shadow dark:divide-gray-600 dark:bg-gray-700">
                     <div>
-                        <a href="#" title=""
+                        <a href="{% url 'profile' %}" title=""
                            class="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-600">
                             <img class="h-8 w-8 shrink-0 rounded-full object-cover"
                                  src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/jese-leos.png"
                                  alt=""/>
                             <div class="min-w-0 flex-1">
                                 <p class="truncate text-sm font-semibold leading-tight text-gray-900 dark:text-white">
-                                    Jese Leos</p>
+                                    {{ request.user.get_full_name }}</p>
                                 <p class="truncate text-sm font-normal text-gray-500 dark:text-gray-400">
-                                    name@example.com</p>
+                                    {{ request.user.email }}</p>
                             </div>
                         </a>
                     </div>
-
                     <ul class="p-2 text-start text-sm font-medium text-gray-900 dark:text-white">
                         <li>
-                            <a href="#" title=""
+                            <a href="{% url 'profile' %}" title=""
                                class="group inline-flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <svg class="h-4 w-4 text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
                                      aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -358,23 +344,33 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#" title=""
-                               class="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-500 dark:hover:bg-gray-600">
-                                <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                     viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                          stroke-width="2"
-                                          d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"/>
-                                </svg>
-                                Log out
-                            </a>
+                            <form method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-500 dark:hover:bg-gray-600">
+                                    <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                         viewBox="0 0 24 24">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                              stroke-width="2"
+                                              d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"/>
+                                    </svg>
+                                    Log out
+                                </button>
+                            </form>
                         </li>
                     </ul>
                 </div>
+                {% else %}
+                <a href="{% url 'login' %}" title=""
+                   class="inline-flex items-center justify-center p-2 text-sm font-medium leading-none text-heading hover:bg-neutral-secondary-medium rounded-lg">
+                    Log in
+                </a>
+                <a href="{% url 'register' %}" title="" class="btn-primary ms-1 shrink-0">Sign up</a>
+                {% endif %}
             </div>
         </div>
         <div class="flex lg:justify-center">
-            <form class="max-w-2xl mx-auto">
+            <form class="w-1/2 mx-auto" method="get" action="{% url 'store' %}">
                 <div class="flex shadow-xs rounded-base -space-x-0.5">
                     <label for="search-dropdown" class="block mb-2.5 text-sm font-medium text-heading sr-only ">Your
                         Email</label>
@@ -408,11 +404,11 @@
                             {% endfor %}
                         </ul>
                     </div>
-                    <input type="search" id="search-dropdown" id="input-group-1"
+                    <input type="search" id="search-dropdown" name="q" value="{{ search_query|default:'' }}"
                            class="px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm focus:ring-brand focus:border-brand block w-full placeholder:text-body"
-                           placeholder="Search for products" required>
-                    <button type="button"
-                            class="inline-flex items-center  text-white bg-brand hover:bg-brand-strong box-border border border-transparent focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-e-base text-sm px-4 py-2.5 focus:outline-none">
+                           placeholder="Search for products">
+                    <button type="submit"
+                            class="inline-flex cursor-pointer items-center  text-white bg-brand hover:bg-brand-strong box-border border border-transparent focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-e-base text-sm px-4 py-2.5 focus:outline-none">
                         <svg class="w-4 h-4 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
                              height="24" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linecap="round" stroke-width="2"
@@ -426,3 +422,31 @@
         </div>
     </div>
 </nav>
+{% for item in nav_cart_items %}
+    <div id="nav-remove-item-modal-{{ item.product.id }}" tabindex="-1"
+         class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
+        <div class="relative max-h-full w-full max-w-md p-4">
+            <div class="relative rounded-base border border-default bg-neutral-primary-soft shadow">
+                <button type="button"
+                        class="absolute right-2.5 top-3 ms-auto inline-flex h-8 w-8 items-center justify-center rounded-base text-body-subtle hover:bg-neutral-secondary-medium"
+                        data-modal-hide="nav-remove-item-modal-{{ item.product.id }}">
+                    <svg class="h-3 w-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M1 1l6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+                <div class="p-4 text-center md:p-5">
+                    <svg class="mx-auto mb-4 h-12 w-12 text-fg-danger" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                         viewBox="0 0 20 20">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                    </svg>
+                    <h3 class="mb-5 text-lg font-normal text-heading">Are you sure want to delete this item?</h3>
+                    <button type="submit" form="nav-remove-item-form-{{ item.product.id }}" class="btn-danger cursor-pointer me-2">Yes</button>
+                    <button type="button" class="btn-secondary cursor-pointer" data-modal-hide="nav-remove-item-modal-{{ item.product.id }}">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 {% block title %}Your Cart - Nexmart{% endblock title %}
 {% block content %}
     <section class="py-4 antialiased md:py-8">
@@ -26,10 +27,10 @@
                                         <div>
                                             <a href="{% url 'products_detail' item.product.category.slug item.product.slug %}"
                                                class="font-medium text-heading hover:text-fg-brand">{{ item.product.product_name }}</a>
-                                            <p class="text-xs text-body-subtle">{{ item.size }} · {{ item.color|title }}</p>
+                                            <p class="text-xs text-body-subtle">Color: {{ item.color|title }} · Size: {{ item.size }}</p>
                                         </div>
                                     </td>
-                                    <td class="px-4 py-3">$ {{ item.product.price }}</td>
+                                    <td class="px-4 py-3">$ {{ item.product.price|intcomma }}</td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center gap-2">
                                             <form method="post" action="{% url 'remove_cart' item.product.id %}">
@@ -43,20 +44,23 @@
                                                 <input type="hidden" name="next" value="{{ request.path }}">
                                                 <button type="submit" aria-label="Increase quantity" class="btn-secondary cursor-pointer px-2.5 py-1">+</button>
                                             </form>
-                                            <form method="post" action="{% url 'remove_cart_item' item.product.id %}">
+                                            <form method="post" action="{% url 'remove_cart_item' item.product.id %}"
+                                                  id="remove-item-form-{{ item.product.id }}">
                                                 {% csrf_token %}
-                                                <button type="submit" aria-label="Remove item"
-                                                        class="ms-2 flex cursor-pointer items-center gap-1 text-fg-danger hover:text-fg-danger-strong">
-                                                    <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                              d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-                                                    </svg>
-                                                    <span class="text-xs">Remove</span>
-                                                </button>
                                             </form>
+                                            <button type="button" aria-label="Remove item"
+                                                    data-modal-target="remove-item-modal-{{ item.product.id }}"
+                                                    data-modal-toggle="remove-item-modal-{{ item.product.id }}"
+                                                    class="ms-2 flex cursor-pointer items-center gap-1 text-fg-danger hover:text-fg-danger-strong">
+                                                <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                          d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                                                </svg>
+                                                <span class="text-xs">Remove</span>
+                                            </button>
                                         </div>
                                     </td>
-                                    <td class="px-4 py-3 font-semibold text-heading">$ {{ item.sub_total }}</td>
+                                    <td class="px-4 py-3 font-semibold text-heading">$ {{ item.sub_total|intcomma }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -66,17 +70,17 @@
                     <div class="w-full max-w-xs rounded-base border border-default bg-neutral-primary-soft p-4">
                         <div class="flex items-center justify-between text-body">
                             <span>Subtotal</span>
-                            <span>$ {{ subtotal }}</span>
+                            <span>$ {{ subtotal|intcomma }}</span>
                         </div>
                         {% for row in taxes %}
                             <div class="mt-2 flex items-center justify-between text-body">
                                 <span>Tax ({{ row.tax.tax_value }}%)</span>
-                                <span>$ {{ row.amount }}</span>
+                                <span>$ {{ row.amount|intcomma }}</span>
                             </div>
                         {% endfor %}
                         <div class="mt-2 flex items-center justify-between border-t border-default pt-2 text-heading">
                             <span class="font-semibold">Total</span>
-                            <span class="font-semibold">$ {{ total }}</span>
+                            <span class="font-semibold">$ {{ total|intcomma }}</span>
                         </div>
                         <a href="#" class="btn-primary mt-4 block w-full text-center">Proceed to Checkout</a>
                     </div>
@@ -87,3 +91,33 @@
         </div>
     </section>
 {% endblock content %}
+{% block modals %}
+    {% for item in cart_items %}
+        <div id="remove-item-modal-{{ item.product.id }}" tabindex="-1"
+             class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
+            <div class="relative max-h-full w-full max-w-md p-4">
+                <div class="relative rounded-base border border-default bg-neutral-primary-soft shadow">
+                    <button type="button"
+                            class="absolute right-2.5 top-3 ms-auto inline-flex h-8 w-8 items-center justify-center rounded-base text-body-subtle hover:bg-neutral-secondary-medium"
+                            data-modal-hide="remove-item-modal-{{ item.product.id }}">
+                        <svg class="h-3 w-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M1 1l6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                        </svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                    <div class="p-4 text-center md:p-5">
+                        <svg class="mx-auto mb-4 h-12 w-12 text-fg-danger" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                             viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                        </svg>
+                        <h3 class="mb-5 text-lg font-normal text-heading">Are you sure want to delete this item?</h3>
+                        <button type="submit" form="remove-item-form-{{ item.product.id }}" class="btn-danger cursor-pointer me-2">Yes</button>
+                        <button type="button" class="btn-secondary cursor-pointer" data-modal-hide="remove-item-modal-{{ item.product.id }}">No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock modals %}

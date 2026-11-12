@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 {% block title %}{{ product.product_name }} - Nexmart{% endblock title %}
 {% block content %}
     <section class="py-4 antialiased md:py-8">
@@ -7,7 +8,7 @@
                 <div class="lg:w-1/2">
                     {% if product.product_image %}
                         <img src="{{ product.product_image.url }}" alt="{{ product.product_name }}"
-                             class="w-full rounded-base border border-default object-cover"/>
+                             class="aspect-square w-full rounded-base border border-default object-cover"/>
                     {% else %}
                         <div class="flex aspect-square w-full items-center justify-center rounded-base border border-default bg-neutral-primary-soft text-sm text-body">
                             No image
@@ -16,26 +17,31 @@
                 </div>
                 <div class="lg:w-1/2">
                     <h1 class="text-2xl font-bold text-heading sm:text-3xl">{{ product.product_name }}</h1>
-                    <p class="mt-4 text-2xl font-bold text-heading">$ {{ product.price }}</p>
+                    <p class="mt-4 text-2xl font-bold text-heading">$ {{ product.price|intcomma }}</p>
                     <p class="mt-4 text-body">{{ product.description }}</p>
+                    {% if product.stock > 0 %}
+                        <p class="mt-2 text-sm text-fg-success-strong">{{ product.stock }} in stock</p>
+                    {% else %}
+                        <p class="mt-2 text-sm text-fg-danger">Out of stock</p>
+                    {% endif %}
 
                     <div class="mt-6">
                         <h2 class="label">Color</h2>
                         <div class="flex flex-wrap gap-2">
-                            {% for value, label, variant in color_links %}
-                                {% if value == product.color %}
+                            {% for color, variant in color_links %}
+                                {% if color.id == product.color_id %}
                                     <span class="inline-flex items-center rounded-base border border-brand bg-brand-softer px-3 py-1.5 text-sm text-fg-brand-strong">
-                                        {{ label }}
+                                        {{ color.label }}
                                     </span>
                                 {% elif variant %}
                                     <a href="{% url 'products_detail' variant.category.slug variant.slug %}"
                                        class="inline-flex items-center rounded-base border border-default-medium bg-neutral-secondary-medium px-3 py-1.5 text-sm text-body hover:border-brand hover:text-fg-brand">
-                                        {{ label }}
+                                        {{ color.label }}
                                     </a>
                                 {% else %}
                                     <span class="inline-flex items-center rounded-base border border-default-medium bg-neutral-secondary-medium px-3 py-1.5 text-sm text-body-subtle opacity-40"
                                           title="Not available in this size">
-                                        {{ label }}
+                                        {{ color.label }}
                                     </span>
                                 {% endif %}
                             {% endfor %}
@@ -45,20 +51,20 @@
                     <div class="mt-6">
                         <h2 class="label">Size</h2>
                         <div class="flex flex-wrap gap-2">
-                            {% for value, label, variant in size_links %}
-                                {% if value == product.size %}
+                            {% for size, variant in size_links %}
+                                {% if size.id == product.size_id %}
                                     <span class="inline-flex items-center rounded-base border border-brand bg-brand-softer px-3 py-1.5 text-sm text-fg-brand-strong">
-                                        {{ label }}
+                                        {{ size.label }}
                                     </span>
                                 {% elif variant %}
                                     <a href="{% url 'products_detail' variant.category.slug variant.slug %}"
                                        class="inline-flex items-center rounded-base border border-default-medium bg-neutral-secondary-medium px-3 py-1.5 text-sm text-body hover:border-brand hover:text-fg-brand">
-                                        {{ label }}
+                                        {{ size.label }}
                                     </a>
                                 {% else %}
                                     <span class="inline-flex items-center rounded-base border border-default-medium bg-neutral-secondary-medium px-3 py-1.5 text-sm text-body-subtle opacity-40"
                                           title="Not available in this color">
-                                        {{ label }}
+                                        {{ size.label }}
                                     </span>
                                 {% endif %}
                             {% endfor %}

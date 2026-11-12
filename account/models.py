@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
+
 class MyUserAccountManager(BaseUserManager):
     def create_user(self, username, first_name, last_name, email, password=None):
         if not email:
@@ -38,7 +39,6 @@ class User(AbstractBaseUser):
     last_name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=100, unique=True)
-    phone_number = models.CharField(max_length=20, unique=True, blank=True, null=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now=True)
     is_staff = models.BooleanField(default=False)
@@ -54,8 +54,35 @@ class User(AbstractBaseUser):
     def __str__(self):
         return self.email
 
+    def get_full_name(self):
+        full_name = f"{self.first_name} {self.last_name}".strip()
+        return full_name or self.username
+
+    def get_short_name(self):
+        return self.first_name or self.username
+
     def has_perm(self, perm, obj=None):
         return self.is_admin
 
     def has_module_perms(self, app_label):
         return True
+
+
+class UserProfile(models.Model):
+    GENDER_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other'),
+    )
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    date_of_birth = models.DateField(blank=True, null=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
+    phone_number = models.CharField(max_length=20, blank=True)
+    shipping_address = models.CharField(max_length=255, blank=True)
+    shipping_city = models.CharField(max_length=100, blank=True)
+    shipping_country = models.CharField(max_length=100, blank=True)
+    shipping_zip_code = models.CharField(max_length=20, blank=True)
+
+    def __str__(self):
+        return f"{self.user.email}'s profile"
