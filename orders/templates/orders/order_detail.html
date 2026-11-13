@@ -1,16 +1,47 @@
 {% extends 'base.html' %}
+{% load humanize %}
 {% block title %}Order {{ order.order_number }} - Nexmart{% endblock title %}
+{% block main_width %}max-w-6xl{% endblock main_width %}
 {% block content %}
     <section class="py-4 antialiased md:py-8">
-        <h1 class="mb-1 text-2xl font-bold text-heading">Order {{ order.order_number }}</h1>
-        <p class="mb-6 text-body">{{ order.created_at|date:"M d, Y H:i" }} · Status: {{ order.get_status_display }}</p>
-        {% include 'orders/_order_summary.html' %}
-        <div class="mt-6 flex items-center gap-4">
-            <a href="{% url 'order_list' %}" class="link">&larr; Back to my orders</a>
+        <div class="mb-8 rounded-base border border-default bg-neutral-primary-soft p-6 text-center sm:p-8">
+            <h1 class="text-2xl font-bold text-heading">Order {{ order.order_number }}</h1>
+            <p class="mt-2 text-sm text-body">Placed on {{ order.created_at|date:"M d, Y H:i" }}</p>
+            <dl class="mx-auto mt-6 grid max-w-3xl gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+                <div class="rounded-base bg-neutral-secondary-medium p-3">
+                    <dt class="text-xs uppercase text-body-subtle">Order status</dt>
+                    <dd class="mt-1 font-semibold text-heading">{{ order.get_status_display }}</dd>
+                </div>
+                <div class="rounded-base bg-neutral-secondary-medium p-3">
+                    <dt class="text-xs uppercase text-body-subtle">Payment</dt>
+                    <dd class="mt-1 font-semibold text-heading">{{ order.get_payment_method_display }} · {{ order.get_payment_status_display }}</dd>
+                </div>
+                <div class="rounded-base bg-neutral-secondary-medium p-3">
+                    <dt class="text-xs uppercase text-body-subtle">Total</dt>
+                    <dd class="mt-1 font-semibold text-heading">$ {{ order.total|intcomma }}</dd>
+                </div>
+                <div class="rounded-base bg-neutral-secondary-medium p-3">
+                    <dt class="text-xs uppercase text-body-subtle">Transaction #</dt>
+                    <dd class="mt-1 break-all font-semibold text-heading">{{ order.transaction_id|default:"—" }}</dd>
+                </div>
+            </dl>
+        </div>
+
+        {% if order.status == 'awaiting_payment' %}
+            <div class="mb-6 flex flex-col items-start justify-between gap-3 rounded-base border border-default bg-neutral-primary-soft p-4 text-sm text-body sm:flex-row sm:items-center">
+                <p>This order is awaiting payment and has not been confirmed yet.</p>
+                <a href="{% url 'payment' order.order_number %}" class="btn-primary">Continue to payment</a>
+            </div>
+        {% endif %}
+
+        {% include 'orders/_order_body.html' %}
+
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <a href="{% url 'order_list' %}" class="btn-secondary text-center">&larr; Back to my orders</a>
             {% if order.can_cancel %}
                 <form method="post" action="{% url 'order_cancel' order.order_number %}">
                     {% csrf_token %}
-                    <button type="submit" class="btn-danger cursor-pointer">Cancel order</button>
+                    <button type="submit" class="btn-danger w-full cursor-pointer">Cancel order</button>
                 </form>
             {% endif %}
         </div>

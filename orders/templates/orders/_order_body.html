@@ -1,0 +1,43 @@
+{% load humanize %}
+        <div class="grid gap-6 lg:grid-cols-5 lg:gap-8">
+            <div class="rounded-base border border-default bg-neutral-primary-soft p-6 sm:p-8 lg:col-span-3">
+                <h2 class="mb-4 text-lg font-semibold text-heading">Items ordered</h2>
+                <ul class="divide-y divide-default">
+                    {% for item in order.items.all %}
+                        <li class="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                            {% if item.product.product_image %}
+                                <img src="{{ item.product.product_image.url }}" alt="{{ item.product_name }}"
+                                     class="h-10 w-10 shrink-0 rounded-base border border-default object-cover"/>
+                            {% else %}
+                                <div class="h-10 w-10 shrink-0 rounded-base border border-default bg-neutral-secondary-medium"></div>
+                            {% endif %}
+                            <div class="min-w-0 flex-1 text-sm">
+                                <p class="font-medium text-heading">{{ item.product_name }}</p>
+                                <p class="text-xs text-body-subtle">Size: {{ item.size }} · Color: {{ item.color|title }} · Qty: {{ item.quantity }}</p>
+                            </div>
+                            <p class="whitespace-nowrap text-sm font-semibold text-heading">$ {{ item.sub_total|intcomma }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="space-y-6 lg:col-span-2">
+                <div class="rounded-base border border-default bg-neutral-primary-soft p-6">
+                    <h2 class="mb-3 text-lg font-semibold text-heading">Shipping to</h2>
+                    <address class="space-y-0.5 text-sm not-italic text-body">
+                        <p class="font-medium text-heading">{{ order.full_name }}</p>
+                        <p>{{ order.address }}</p>
+                        <p>{{ order.city }}, {{ order.country }} {{ order.zip_code }}</p>
+                        <p>{{ order.phone_number }}</p>
+                    </address>
+                </div>
+                <div class="rounded-base border border-default bg-neutral-primary-soft p-6">
+                    <h2 class="mb-3 text-lg font-semibold text-heading">Summary</h2>
+                    <div class="flex justify-between text-body"><span>Sub Total</span><span>$ {{ order.subtotal|intcomma }}</span></div>
+                    <div class="mt-2 flex justify-between text-body"><span>Tax</span><span>$ {{ order.tax_total|intcomma }}</span></div>
+                    <div class="mt-2 flex justify-between border-t border-default pt-2 text-heading">
+                        <span class="font-semibold">Grand Total</span><span class="font-semibold">$ {{ order.total|intcomma }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
