@@ -1,29 +1,94 @@
 {% extends 'base.html' %}
+{% load humanize %}
 {% block title %}Order placed - Nexmart{% endblock title %}
+{% block main_width %}max-w-6xl{% endblock main_width %}
 {% block content %}
     <section class="py-4 antialiased md:py-8">
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold text-heading">Thank you! Your order has been placed.</h1>
-            <p class="mt-1 text-body">Order number: <span class="font-semibold text-heading">{{ order.order_number }}</span>
-                · {{ order.created_at|date:"M d, Y H:i" }}</p>
+        <div class="mb-8 rounded-base border border-default bg-neutral-primary-soft p-6 text-center sm:p-8">
+            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-success-soft text-fg-success">
+                <svg class="h-8 w-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12 4.7 4.5 9.3-9"/>
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-heading">Thank you, {{ order.first_name }}! Your order has been placed.</h1>
+            <p class="mt-2 text-sm text-body">A confirmation email has been sent to <strong class="text-heading">{{ order.email }}</strong>.</p>
+            <dl class="mx-auto mt-6 grid max-w-3xl gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+                <div class="rounded-base bg-neutral-secondary-medium p-3">
+                    <dt class="text-xs uppercase text-body-subtle">Order #</dt>
+                    <dd class="mt-1 font-semibold text-heading">{{ order.order_number }}</dd>
+                </div>
+                <div class="rounded-base bg-neutral-secondary-medium p-3">
+                    <dt class="text-xs uppercase text-body-subtle">Date</dt>
+                    <dd class="mt-1 font-semibold text-heading">{{ order.created_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                <div class="rounded-base bg-neutral-secondary-medium p-3">
+                    <dt class="text-xs uppercase text-body-subtle">Payment</dt>
+                    <dd class="mt-1 font-semibold text-heading">{{ order.get_payment_method_display }} · {{ order.get_payment_status_display }}</dd>
+                </div>
+                <div class="rounded-base bg-neutral-secondary-medium p-3">
+                    <dt class="text-xs uppercase text-body-subtle">{% if order.transaction_id %}Transaction #{% else %}Total{% endif %}</dt>
+                    <dd class="mt-1 break-all font-semibold text-heading">{% if order.transaction_id %}{{ order.transaction_id }}{% else %}$ {{ order.total|intcomma }}{% endif %}</dd>
+                </div>
+            </dl>
         </div>
+
         {% if order.payment_status != 'paid' %}
             <div class="mb-6 rounded-base border border-default bg-neutral-primary-soft p-4 text-sm text-body">
                 <h2 class="mb-1 font-semibold text-heading">Next step: payment</h2>
                 {% if order.payment_method == 'bank_transfer' %}
-                    <p>Please transfer <strong>$ {{ order.total }}</strong> to our bank account and use <strong>{{ order.order_number }}</strong> as the payment reference. We will ship once the transfer is received.</p>
-                {% elif order.payment_method == 'paypal' %}
-                    <p>Your order is reserved. We will email you a PayPal payment request for <strong>$ {{ order.total }}</strong> shortly.</p>
+                    <p>Please transfer <strong>$ {{ order.total|intcomma }}</strong> to our bank account and use <strong>{{ order.order_number }}</strong> as the payment reference. We will ship once the transfer is received.</p>
                 {% else %}
-                    <p>Your order is reserved. We will email you a secure link to pay <strong>$ {{ order.total }}</strong> by credit card shortly.</p>
+                    <p>Your order is reserved. We will contact you to complete the payment of <strong>$ {{ order.total|intcomma }}</strong>.</p>
                 {% endif %}
             </div>
         {% endif %}
-        <p class="mb-6 text-body">A confirmation email has been sent to <strong>{{ order.email }}</strong>.</p>
-        {% include 'orders/_order_summary.html' %}
-        <div class="mt-6 flex gap-3">
-            <a href="{% url 'store' %}" class="btn-primary">Continue shopping</a>
-            <a href="{% url 'order_detail' order.order_number %}" class="btn-secondary">View order</a>
+
+        <div class="grid gap-6 lg:grid-cols-5 lg:gap-8">
+            <div class="rounded-base border border-default bg-neutral-primary-soft p-6 sm:p-8 lg:col-span-3">
+                <h2 class="mb-4 text-lg font-semibold text-heading">Items ordered</h2>
+                <ul class="divide-y divide-default">
+                    {% for item in order.items.all %}
+                        <li class="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                            {% if item.product.product_image %}
+                                <img src="{{ item.product.product_image.url }}" alt="{{ item.product_name }}"
+                                     class="h-10 w-10 shrink-0 rounded-base border border-default object-cover"/>
+                            {% else %}
+                                <div class="h-10 w-10 shrink-0 rounded-base border border-default bg-neutral-secondary-medium"></div>
+                            {% endif %}
+                            <div class="min-w-0 flex-1 text-sm">
+                                <p class="font-medium text-heading">{{ item.product_name }}</p>
+                                <p class="text-xs text-body-subtle">Size: {{ item.size }} · Color: {{ item.color|title }} · Qty: {{ item.quantity }}</p>
+                            </div>
+                            <p class="whitespace-nowrap text-sm font-semibold text-heading">$ {{ item.sub_total|intcomma }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="space-y-6 lg:col-span-2">
+                <div class="rounded-base border border-default bg-neutral-primary-soft p-6">
+                    <h2 class="mb-3 text-lg font-semibold text-heading">Shipping to</h2>
+                    <address class="space-y-0.5 text-sm not-italic text-body">
+                        <p class="font-medium text-heading">{{ order.full_name }}</p>
+                        <p>{{ order.address }}</p>
+                        <p>{{ order.city }}, {{ order.country }} {{ order.zip_code }}</p>
+                        <p>{{ order.phone_number }}</p>
+                    </address>
+                </div>
+                <div class="rounded-base border border-default bg-neutral-primary-soft p-6">
+                    <h2 class="mb-3 text-lg font-semibold text-heading">Summary</h2>
+                    <div class="flex justify-between text-body"><span>Sub Total</span><span>$ {{ order.subtotal|intcomma }}</span></div>
+                    <div class="mt-2 flex justify-between text-body"><span>Tax</span><span>$ {{ order.tax_total|intcomma }}</span></div>
+                    <div class="mt-2 flex justify-between border-t border-default pt-2 text-heading">
+                        <span class="font-semibold">Grand Total</span><span class="font-semibold">$ {{ order.total|intcomma }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <a href="{% url 'store' %}" class="btn-primary text-center">Continue shopping</a>
+            <a href="{% url 'order_detail' order.order_number %}" class="btn-secondary text-center">View order</a>
         </div>
     </section>
 {% endblock content %}
