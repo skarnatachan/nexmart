@@ -36,7 +36,8 @@ INSTALLED_APPS = [
     'account.apps.AccountConfig',
     "category.apps.CatregoryConfig",
     "store.apps.StoreConfig",
-    "carts.apps.CartsConfig"
+    "carts.apps.CartsConfig",
+    "orders.apps.OrdersConfig",
 ]
 
 MIDDLEWARE = [
@@ -152,3 +153,9 @@ AUTH_USER_MODEL = "account.User"
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
+
+# PayPal (sandbox by default). Credentials come from .env.
+PAYPAL_CLIENT_ID = env("PAYPAL_CLIENT_ID", default="")
+PAYPAL_SECRET_KEY = env("PAYPAL_SECRET_KEY", default="")
+PAYPAL_API_BASE = env("PAYPAL_API_BASE", default="https://api-m.sandbox.paypal.com")
+PAYPAL_CURRENCY = env("PAYPAL_CURRENCY", default="USD")

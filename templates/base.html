@@ -23,7 +23,7 @@
 </head>
 <body class="flex min-h-full flex-col bg-neutral-secondary-soft font-sans text-body antialiased">
 {% include "partials/navbar.html" %}
-<main class="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
+<main class="mx-auto w-full {% block main_width %}max-w-5xl{% endblock %} flex-1 px-4 py-8">
     {% if messages %}
         <div class="mb-6 space-y-3">
             {% for message in messages %}
@@ -75,6 +75,7 @@
 <script src="{% static 'js/messages.js' %}"></script>
 <script src="{% static 'js/logout-modal.js' %}"></script>
 <script src="{% static 'js/photo-preview.js' %}"></script>
+<script src="{% static 'js/cart-dropdown.js' %}"></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

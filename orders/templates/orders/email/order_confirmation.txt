@@ -1,0 +1,11 @@
+Thanks for your order, {{ full_name }}!
+
+Order {{ order_number }} - payment method: {{ payment_method }}
+{% for line in lines %}- {{ line.name }} ({{ line.color }}, {{ line.size }}) x {{ line.quantity }}: $ {{ line.sub_total }}
+{% endfor %}
+Subtotal: $ {{ subtotal }}
+Tax: $ {{ tax_total }}
+Total: $ {{ total }}
+
+Shipping to: {{ address }}
+View your order: {{ order_url }}

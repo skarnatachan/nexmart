@@ -1,0 +1,36 @@
+{% load humanize %}
+<div class="overflow-x-auto rounded-base border border-default">
+    <table class="w-full text-left text-sm text-body">
+        <thead class="bg-neutral-secondary-medium text-xs uppercase text-heading">
+            <tr><th class="px-4 py-3">Product</th><th class="px-4 py-3">Price</th><th class="px-4 py-3">Qty</th><th class="px-4 py-3">Subtotal</th></tr>
+        </thead>
+        <tbody>
+            {% for item in order.items.all %}
+                <tr class="border-t border-default bg-neutral-primary-soft">
+                    <td class="px-4 py-3"><span class="font-medium text-heading">{{ item.product_name }}</span>
+                        <p class="text-xs text-body-subtle">Color: {{ item.color|title }} · Size: {{ item.size }}</p></td>
+                    <td class="px-4 py-3">$ {{ item.price|intcomma }}</td>
+                    <td class="px-4 py-3">{{ item.quantity }}</td>
+                    <td class="px-4 py-3 font-semibold text-heading">$ {{ item.sub_total|intcomma }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="mt-6 grid gap-6 md:grid-cols-2">
+    <div class="rounded-base border border-default bg-neutral-primary-soft p-4 text-sm text-body">
+        <h3 class="mb-2 font-semibold text-heading">Shipping to</h3>
+        <p>{{ order.full_name }}</p>
+        <p>{{ order.address }}</p>
+        <p>{{ order.city }}, {{ order.country }} {{ order.zip_code }}</p>
+        <p>{{ order.phone_number }} · {{ order.email }}</p>
+        <p class="mt-2">Payment: {{ order.get_payment_method_display }} · {{ order.get_payment_status_display }}</p>
+        {% if order.order_note %}<p class="mt-2">Note: {{ order.order_note }}</p>{% endif %}
+    </div>
+    <div class="rounded-base border border-default bg-neutral-primary-soft p-4 text-sm text-body">
+        <div class="flex justify-between"><span>Subtotal</span><span>$ {{ order.subtotal|intcomma }}</span></div>
+        <div class="mt-2 flex justify-between"><span>Tax</span><span>$ {{ order.tax_total|intcomma }}</span></div>
+        <div class="mt-2 flex justify-between border-t border-default pt-2 text-heading">
+            <span class="font-semibold">Total</span><span class="font-semibold">$ {{ order.total|intcomma }}</span></div>
+    </div>
+</div>

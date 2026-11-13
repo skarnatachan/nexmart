@@ -3,20 +3,11 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from store.models import Product
-from .models import Cart, CartItem, calculate_taxes
-
-
-def _cart_id(request):
-    if not request.session.session_key:
-        request.session.create()
-    return request.session.session_key
+from .models import CartItem, calculate_taxes, get_cart
 
 
 def _get_cart(request):
-    cart, _created = Cart.objects.get_or_create(cart_id=_cart_id(request))
-    print("cart : ", cart)
-    print("created : ", _created)
-    return cart
+    return get_cart(request, create=True)
 
 
 def _redirect_back(request):
@@ -58,14 +49,10 @@ def remove_cart_item(request, product_id):
 
 
 def cart(request):
-    session_key = request.session.session_key
-    print("session_key in views : ", session_key)
+    cart_obj = get_cart(request)
     cart_items = CartItem.objects.none()
-    print("cart_items : ", cart_items)
-    if session_key:
-        cart_obj = Cart.objects.filter(cart_id=session_key).first()
-        if cart_obj:
-            cart_items = cart_obj.items.filter(is_active=True).select_related('product')
+    if cart_obj:
+        cart_items = cart_obj.items.filter(is_active=True).select_related('product')
     subtotal = sum((item.sub_total() for item in cart_items), Decimal('0'))
     taxes, tax_total = calculate_taxes(subtotal)
 

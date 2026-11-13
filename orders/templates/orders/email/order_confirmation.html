@@ -1,0 +1,19 @@
+{% extends 'account/email/_base_email.html' %}
+{% block email_title %}Order {{ order_number }}{% endblock %}
+{% block email_body %}
+    <h1 style="font-size:20px; margin:0 0 16px; color:#111827;">Thanks for your order, {{ full_name }}!</h1>
+    <p style="margin:0 0 16px;">We received your order <strong>{{ order_number }}</strong>. Payment method: <strong>{{ payment_method }}</strong>.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px; font-size:14px;">
+        {% for line in lines %}
+            <tr>
+                <td style="padding:6px 0; border-bottom:1px solid #e5e7eb;">{{ line.name }} ({{ line.color }}, {{ line.size }}) &times; {{ line.quantity }}</td>
+                <td style="padding:6px 0; border-bottom:1px solid #e5e7eb;" align="right">$ {{ line.sub_total }}</td>
+            </tr>
+        {% endfor %}
+        <tr><td style="padding:6px 0;">Subtotal</td><td align="right">$ {{ subtotal }}</td></tr>
+        <tr><td style="padding:6px 0;">Tax</td><td align="right">$ {{ tax_total }}</td></tr>
+        <tr><td style="padding:6px 0;"><strong>Total</strong></td><td align="right"><strong>$ {{ total }}</strong></td></tr>
+    </table>
+    <p style="margin:0 0 16px;">Shipping to: {{ address }}</p>
+    <p style="margin:0;"><a href="{{ order_url }}" style="display:inline-block; background-color:#1d4ed8; color:#ffffff; text-decoration:none; padding:12px 24px; border-radius:6px; font-weight:bold;">View your order</a></p>
+{% endblock %}

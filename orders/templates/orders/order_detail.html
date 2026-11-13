@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Order {{ order.order_number }} - Nexmart{% endblock title %}
+{% block content %}
+    <section class="py-4 antialiased md:py-8">
+        <h1 class="mb-1 text-2xl font-bold text-heading">Order {{ order.order_number }}</h1>
+        <p class="mb-6 text-body">{{ order.created_at|date:"M d, Y H:i" }} · Status: {{ order.get_status_display }}</p>
+        {% include 'orders/_order_summary.html' %}
+        <div class="mt-6 flex items-center gap-4">
+            <a href="{% url 'order_list' %}" class="link">&larr; Back to my orders</a>
+            {% if order.can_cancel %}
+                <form method="post" action="{% url 'order_cancel' order.order_number %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-danger cursor-pointer">Cancel order</button>
+                </form>
+            {% endif %}
+        </div>
+    </section>
+{% endblock content %}

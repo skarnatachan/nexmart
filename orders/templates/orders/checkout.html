@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Checkout - Nexmart{% endblock title %}
+{% block main_width %}max-w-6xl{% endblock main_width %}
+{% block content %}
+    <section class="py-4 antialiased md:py-8">
+        <h1 class="mb-6 text-2xl font-bold text-heading">Checkout</h1>
+        <form method="post" id="checkout-form" class="grid gap-6 lg:grid-cols-5 lg:gap-8">
+            {% csrf_token %}
+            <div class="lg:col-span-3">
+                <div class="rounded-base border border-default bg-neutral-primary-soft p-6 sm:p-8">
+                    <h2 class="mb-4 text-lg font-semibold text-heading">Shipping details</h2>
+                    {% if form.non_field_errors %}
+                        <div class="mb-4 rounded-base border border-danger-subtle bg-danger-soft p-3 text-sm text-fg-danger-strong">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+                    <div class="grid gap-4 sm:grid-cols-2 xl:gap-6">
+                        <div>
+                            <label for="{{ form.first_name.id_for_label }}" class="label">{{ form.first_name.label }}</label>
+                            {{ form.first_name }}
+                            {% for error in form.first_name.errors %}<p class="helper-text text-fg-danger">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.last_name.id_for_label }}" class="label">{{ form.last_name.label }}</label>
+                            {{ form.last_name }}
+                            {% for error in form.last_name.errors %}<p class="helper-text text-fg-danger">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.email.id_for_label }}" class="label">{{ form.email.label }}</label>
+                            {{ form.email }}
+                            {% for error in form.email.errors %}<p class="helper-text text-fg-danger">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.phone_number.id_for_label }}" class="label">{{ form.phone_number.label }}</label>
+                            {{ form.phone_number }}
+                            {% for error in form.phone_number.errors %}<p class="helper-text text-fg-danger">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label for="{{ form.address.id_for_label }}" class="label">{{ form.address.label }}</label>
+                            {{ form.address }}
+                            {% for error in form.address.errors %}<p class="helper-text text-fg-danger">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.city.id_for_label }}" class="label">{{ form.city.label }}</label>
+                            {{ form.city }}
+                            {% for error in form.city.errors %}<p class="helper-text text-fg-danger">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.country.id_for_label }}" class="label">{{ form.country.label }}</label>
+                            {{ form.country }}
+                            {% for error in form.country.errors %}<p class="helper-text text-fg-danger">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.zip_code.id_for_label }}" class="label">{{ form.zip_code.label }}</label>
+                            {{ form.zip_code }}
+                            {% for error in form.zip_code.errors %}<p class="helper-text text-fg-danger">{{ error }}</p>{% endfor %}
+                        </div>
+                    </div>
+                    <label class="mt-4 flex cursor-pointer items-center gap-2 text-sm text-heading">
+                        {{ form.save_to_profile }} {{ form.save_to_profile.label }}
+                    </label>
+                    <div class="mt-4">
+                        <label for="{{ form.order_note.id_for_label }}" class="label">{{ form.order_note.label }}</label>
+                        {{ form.order_note }}
+                        {% for error in form.order_note.errors %}<p class="helper-text text-fg-danger">{{ error }}</p>{% endfor %}
+                    </div>
+                    <h2 class="mb-3 mt-6 text-lg font-semibold text-heading">Payment method</h2>
+                    <div class="grid gap-3 sm:grid-cols-3">
+                        {% for radio in form.payment_method %}
+                            <label for="{{ radio.id_for_label }}" class="cursor-pointer">
+                                <span class="sr-only">{{ radio.choice_label }}</span>
+                                <input type="radio" name="{{ radio.data.name }}" value="{{ radio.data.value }}"
+                                       id="{{ radio.id_for_label }}" class="peer sr-only"
+                                       {% if radio.data.selected %}checked{% endif %}>
+                                <span class="flex h-full flex-col items-center gap-2 rounded-base border border-default-medium bg-neutral-secondary-medium p-4 text-center text-sm font-medium text-heading shadow-xs transition hover:border-brand peer-checked:border-brand peer-checked:ring-2 peer-checked:ring-brand peer-focus-visible:ring-2 peer-focus-visible:ring-brand">
+                                    {% if radio.data.value == 'paypal' %}
+                                        <i class="fa-brands fa-paypal text-2xl" aria-hidden="true"></i>
+                                        <span>PayPal</span>
+                                        <span class="text-xs font-normal text-body-subtle">Pay with your PayPal account</span>
+                                    {% elif radio.data.value == 'credit_card' %}
+                                        <i class="fa-solid fa-credit-card text-2xl" aria-hidden="true"></i>
+                                        <span>Credit Card</span>
+                                        <span class="text-xs font-normal text-body-subtle">Visa, Mastercard, Amex</span>
+                                    {% else %}
+                                        <i class="fa-solid fa-building-columns text-2xl" aria-hidden="true"></i>
+                                        <span>Bank Transfer</span>
+                                        <span class="text-xs font-normal text-body-subtle">Direct transfer to our account</span>
+                                    {% endif %}
+                                </span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                    {% for error in form.payment_method.errors %}<p class="helper-text text-fg-danger">{{ error }}</p>{% endfor %}
+                </div>
+            </div>
+
+            <div class="h-fit rounded-base border border-default bg-neutral-primary-soft p-6 lg:col-span-2 lg:sticky lg:top-6">
+                <h2 class="mb-4 text-lg font-semibold text-heading">Order summary</h2>
+                <ul class="space-y-3 text-sm">
+                    {% for item in cart_items %}
+                        <li class="flex items-center gap-3 text-body">
+                            {% if item.product.product_image %}
+                                <img src="{{ item.product.product_image.url }}" alt="{{ item.product.product_name }}"
+                                     class="h-12 w-12 shrink-0 rounded-base border border-default object-cover"/>
+                            {% else %}
+                                <div class="h-12 w-12 shrink-0 rounded-base border border-default bg-neutral-secondary-medium"></div>
+                            {% endif %}
+                            <span class="min-w-0 flex-1">{{ item.product.product_name }}
+                                <span class="block text-xs text-body-subtle">{{ item.color|title }}, {{ item.size }} × {{ item.quantity }}</span></span>
+                            <span class="whitespace-nowrap">$ {{ item.sub_total|intcomma }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <div class="mt-4 flex items-center justify-between border-t border-default pt-3 text-body">
+                    <span>Subtotal</span><span>$ {{ subtotal|intcomma }}</span>
+                </div>
+                {% for row in taxes %}
+                    <div class="mt-2 flex items-center justify-between text-body">
+                        <span>Tax ({{ row.tax.tax_value }}%)</span><span>$ {{ row.amount|intcomma }}</span>
+                    </div>
+                {% endfor %}
+                <div class="mt-2 flex items-center justify-between border-t border-default pt-2 text-heading">
+                    <span class="font-semibold">Total</span><span class="font-semibold">$ {{ total|intcomma }}</span>
+                </div>
+                <button type="submit" id="place-order-btn" class="btn-primary mt-4 w-full cursor-pointer">Place order</button>
+                <a href="{% url 'cart' %}" class="btn-secondary mt-2 block w-full text-center">Back to cart</a>
+            </div>
+        </form>
+    </section>
+{% endblock content %}
+{% block modals %}{% load static %}<script src="{% static 'js/place-order.js' %}"></script>{% endblock modals %}

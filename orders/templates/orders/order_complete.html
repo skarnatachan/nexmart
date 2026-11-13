@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Order placed - Nexmart{% endblock title %}
+{% block content %}
+    <section class="py-4 antialiased md:py-8">
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-heading">Thank you! Your order has been placed.</h1>
+            <p class="mt-1 text-body">Order number: <span class="font-semibold text-heading">{{ order.order_number }}</span>
+                · {{ order.created_at|date:"M d, Y H:i" }}</p>
+        </div>
+        {% if order.payment_status != 'paid' %}
+            <div class="mb-6 rounded-base border border-default bg-neutral-primary-soft p-4 text-sm text-body">
+                <h2 class="mb-1 font-semibold text-heading">Next step: payment</h2>
+                {% if order.payment_method == 'bank_transfer' %}
+                    <p>Please transfer <strong>$ {{ order.total }}</strong> to our bank account and use <strong>{{ order.order_number }}</strong> as the payment reference. We will ship once the transfer is received.</p>
+                {% elif order.payment_method == 'paypal' %}
+                    <p>Your order is reserved. We will email you a PayPal payment request for <strong>$ {{ order.total }}</strong> shortly.</p>
+                {% else %}
+                    <p>Your order is reserved. We will email you a secure link to pay <strong>$ {{ order.total }}</strong> by credit card shortly.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+        <p class="mb-6 text-body">A confirmation email has been sent to <strong>{{ order.email }}</strong>.</p>
+        {% include 'orders/_order_summary.html' %}
+        <div class="mt-6 flex gap-3">
+            <a href="{% url 'store' %}" class="btn-primary">Continue shopping</a>
+            <a href="{% url 'order_detail' order.order_number %}" class="btn-secondary">View order</a>
+        </div>
+    </section>
+{% endblock content %}

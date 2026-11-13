@@ -82,7 +82,7 @@
                             <span class="font-semibold">Total</span>
                             <span class="font-semibold">$ {{ total|intcomma }}</span>
                         </div>
-                        <a href="#" class="btn-primary mt-4 block w-full text-center">Proceed to Checkout</a>
+                        <a href="{% url 'checkout' %}" class="btn-primary mt-4 block w-full text-center">Proceed to Checkout</a>
                     </div>
                 </div>
             {% else %}

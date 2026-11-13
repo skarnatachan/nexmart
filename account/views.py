@@ -18,6 +18,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 
 from . import tasks
+from carts.models import merge_session_cart
 from .forms import (
     CustomPasswordResetForm,
     EmailAuthenticationForm,
@@ -122,7 +123,10 @@ class EmailLoginView(LoginView):
     redirect_authenticated_user = True
 
     def form_valid(self, form):
+        # Login rotates the session key, so remember the guest cart's key first.
+        guest_cart_id = self.request.session.get('cart_id') or self.request.session.session_key
         response = super().form_valid(form)
+        merge_session_cart(self.request, self.request.user, guest_cart_id)
         messages.success(self.request, f'Welcome back, {self.request.user.get_full_name()}! You have been logged in successfully.')
         return response
 

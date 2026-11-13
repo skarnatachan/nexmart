@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}My Orders - Nexmart{% endblock title %}
+{% block content %}
+    <section class="py-4 antialiased md:py-8">
+        <h1 class="mb-6 text-2xl font-bold text-heading">My Orders</h1>
+        {% if orders %}
+            <div class="overflow-x-auto rounded-base border border-default">
+                <table class="w-full text-left text-sm text-body">
+                    <thead class="bg-neutral-secondary-medium text-xs uppercase text-heading">
+                        <tr><th class="px-4 py-3">Order</th><th class="px-4 py-3">Date</th><th class="px-4 py-3">Total</th><th class="px-4 py-3">Status</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr class="border-t border-default bg-neutral-primary-soft">
+                                <td class="px-4 py-3"><a href="{% url 'order_detail' order.order_number %}" class="link">{{ order.order_number }}</a></td>
+                                <td class="px-4 py-3">{{ order.created_at|date:"M d, Y" }}</td>
+                                <td class="px-4 py-3">$ {{ order.total|intcomma }}</td>
+                                <td class="px-4 py-3">{{ order.get_status_display }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-body">You have no orders yet. <a href="{% url 'store' %}" class="link">Start shopping</a>.</p>
+        {% endif %}
+    </section>
+{% endblock content %}
