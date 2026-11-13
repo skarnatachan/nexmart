@@ -9,8 +9,8 @@
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f3f4f6; padding:32px 16px;">
     <tr>
         <td align="center">
-            <table role="presentation" width="480" cellpadding="0" cellspacing="0"
-                   style="max-width:480px; width:100%; background-color:#ffffff; border-radius:8px; overflow:hidden;">
+            <table role="presentation" width="{% block email_width %}480{% endblock %}" cellpadding="0" cellspacing="0"
+                   style="max-width:{% block email_max_width %}480{% endblock %}px; width:100%; background-color:#ffffff; border-radius:8px; overflow:hidden;">
                 <tr>
                     <td style="padding:24px 32px; border-bottom:1px solid #e5e7eb;" align="center">
                         <img src="{{ logo_url }}" alt="Nexmart" height="32" style="display:block; height:32px;">

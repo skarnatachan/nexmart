@@ -26,6 +26,13 @@ def _send_confirmation(request, order):
         'full_name': order.full_name(),
         'order_number': order.order_number,
         'payment_method': order.get_payment_method_display(),
+        'transaction_id': order.transaction_id,
+        'order_date': order.created_at.strftime('%b %d, %Y %H:%M'),
+        'status': order.get_status_display(),
+        'payment_status': order.get_payment_status_display(),
+        'address_lines': [order.address, f'{order.city}, {order.zip_code}', order.country],
+        'phone_number': order.phone_number,
+        'email': order.email,
         'subtotal': str(order.subtotal), 'tax_total': str(order.tax_total), 'total': str(order.total),
         'address': f'{order.address}, {order.city}, {order.country} {order.zip_code}',
         'lines': [

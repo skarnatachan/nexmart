@@ -1,11 +1,22 @@
-Thanks for your order, {{ full_name }}!
+INVOICE
 
-Order {{ order_number }} - payment method: {{ payment_method }}
+Invoice to:
+{{ full_name }}
+{% for line in address_lines %}{{ line }}
+{% endfor %}{{ phone_number }}
+{{ email }}
+
+Order #: {{ order_number }}
+{% if transaction_id %}Transaction #: {{ transaction_id }}
+{% endif %}Order date: {{ order_date }}
+Payment: {{ payment_method }}
+Status: {{ payment_status }} ({{ status }})
+
+Items:
 {% for line in lines %}- {{ line.name }} ({{ line.color }}, {{ line.size }}) x {{ line.quantity }}: $ {{ line.sub_total }}
 {% endfor %}
-Subtotal: $ {{ subtotal }}
+Sub Total: $ {{ subtotal }}
 Tax: $ {{ tax_total }}
-Total: $ {{ total }}
+Grand Total: $ {{ total }}
 
-Shipping to: {{ address }}
 View your order: {{ order_url }}

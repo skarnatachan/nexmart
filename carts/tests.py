@@ -222,3 +222,26 @@ class PayPalTests(PlaceOrderTests):
         self.client.post(reverse('payment', args=[order.order_number]))
         order.refresh_from_db()
         self.assertEqual(order.status, 'awaiting_payment')
+
+
+class InvoiceEmailTests(PayPalTests):
+    def test_invoice_email_after_paypal_capture(self):
+        from unittest import mock
+        order = self._to_payment()
+        with mock.patch('orders.views.paypal.create_order', return_value='PP-1'), \
+                mock.patch('orders.views.tasks.send_order_confirmation_email.delay') as mail:
+            self.client.post(reverse('paypal_create', args=[order.order_number]))
+            capture = {'id': 'CAP-9', 'status': 'COMPLETED', 'amount': {'currency_code': 'USD', 'value': f'{order.total:.2f}'}}
+            with mock.patch('orders.views.paypal.capture_order', return_value=capture):
+                self.client.post(reverse('paypal_capture', args=[order.order_number]),
+                                 {'orderID': 'PP-1'}, content_type='application/json')
+        context = mail.call_args[0][0]
+        from django.core import mail as djmail
+        from orders.tasks import send_order_confirmation_email
+        send_order_confirmation_email(context, 'a@b.com')
+        msg = djmail.outbox[0]
+        html = msg.alternatives[0][0]
+        for text in ('Invoice to', order.order_number, 'CAP-9', 'Item description', 'Sub Total', 'Tax', 'Grand Total', 'Paid'):
+            self.assertIn(text, html)
+        self.assertIn('Transaction #: CAP-9', msg.body)
+        self.assertIn('invoice', msg.subject.lower())

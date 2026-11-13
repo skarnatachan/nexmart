@@ -1,19 +1,51 @@
 {% extends 'account/email/_base_email.html' %}
-{% block email_title %}Order {{ order_number }}{% endblock %}
+{% block email_width %}600{% endblock %}
+{% block email_max_width %}600{% endblock %}
+{% block email_title %}Invoice {{ order_number }}{% endblock %}
 {% block email_body %}
-    <h1 style="font-size:20px; margin:0 0 16px; color:#111827;">Thanks for your order, {{ full_name }}!</h1>
-    <p style="margin:0 0 16px;">We received your order <strong>{{ order_number }}</strong>. Payment method: <strong>{{ payment_method }}</strong>.</p>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px; font-size:14px;">
+    <h1 style="font-size:20px; margin:0 0 4px; color:#111827;">Invoice</h1>
+    <p style="margin:0 0 20px; color:#6b7280;">Thank you for your order, {{ full_name }}!</p>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px; font-size:14px;">
+        <tr>
+            <td valign="top" width="50%" style="padding-right:12px;">
+                <p style="margin:0 0 4px; font-size:12px; text-transform:uppercase; color:#6b7280;">Invoice to</p>
+                <p style="margin:0; font-weight:bold;">{{ full_name }}</p>
+                {% for line in address_lines %}<p style="margin:0;">{{ line }}</p>{% endfor %}
+                <p style="margin:0;">{{ phone_number }}</p>
+                <p style="margin:0;">{{ email }}</p>
+            </td>
+            <td valign="top" width="50%" style="padding-left:12px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;">
+                    <tr><td style="padding:2px 0; color:#6b7280;">Order #</td><td align="right"><strong>{{ order_number }}</strong></td></tr>
+                    {% if transaction_id %}<tr><td style="padding:2px 0; color:#6b7280;">Transaction #</td><td align="right"><strong>{{ transaction_id }}</strong></td></tr>{% endif %}
+                    <tr><td style="padding:2px 0; color:#6b7280;">Order date</td><td align="right">{{ order_date }}</td></tr>
+                    <tr><td style="padding:2px 0; color:#6b7280;">Payment</td><td align="right">{{ payment_method }}</td></tr>
+                    <tr><td style="padding:2px 0; color:#6b7280;">Status</td><td align="right"><strong>{{ payment_status }}</strong> ({{ status }})</td></tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px; border-collapse:collapse;">
+        <tr style="background-color:#f3f4f6;">
+            <th align="left" style="padding:8px 10px; border-bottom:1px solid #e5e7eb;">Item description</th>
+            <th align="center" style="padding:8px 10px; border-bottom:1px solid #e5e7eb;">Qty</th>
+            <th align="right" style="padding:8px 10px; border-bottom:1px solid #e5e7eb;">Total</th>
+        </tr>
         {% for line in lines %}
             <tr>
-                <td style="padding:6px 0; border-bottom:1px solid #e5e7eb;">{{ line.name }} ({{ line.color }}, {{ line.size }}) &times; {{ line.quantity }}</td>
-                <td style="padding:6px 0; border-bottom:1px solid #e5e7eb;" align="right">$ {{ line.sub_total }}</td>
+                <td style="padding:8px 10px; border-bottom:1px solid #e5e7eb;">{{ line.name }}<br>
+                    <span style="font-size:12px; color:#6b7280;">Color: {{ line.color }} &middot; Size: {{ line.size }}</span></td>
+                <td align="center" style="padding:8px 10px; border-bottom:1px solid #e5e7eb;">{{ line.quantity }}</td>
+                <td align="right" style="padding:8px 10px; border-bottom:1px solid #e5e7eb;">$ {{ line.sub_total }}</td>
             </tr>
         {% endfor %}
-        <tr><td style="padding:6px 0;">Subtotal</td><td align="right">$ {{ subtotal }}</td></tr>
-        <tr><td style="padding:6px 0;">Tax</td><td align="right">$ {{ tax_total }}</td></tr>
-        <tr><td style="padding:6px 0;"><strong>Total</strong></td><td align="right"><strong>$ {{ total }}</strong></td></tr>
+        <tr><td colspan="2" align="right" style="padding:8px 10px;">Sub Total</td><td align="right" style="padding:8px 10px;">$ {{ subtotal }}</td></tr>
+        <tr><td colspan="2" align="right" style="padding:4px 10px;">Tax</td><td align="right" style="padding:4px 10px;">$ {{ tax_total }}</td></tr>
+        <tr><td colspan="2" align="right" style="padding:8px 10px; border-top:2px solid #111827;"><strong>Grand Total</strong></td>
+            <td align="right" style="padding:8px 10px; border-top:2px solid #111827;"><strong>$ {{ total }}</strong></td></tr>
     </table>
-    <p style="margin:0 0 16px;">Shipping to: {{ address }}</p>
-    <p style="margin:0;"><a href="{{ order_url }}" style="display:inline-block; background-color:#1d4ed8; color:#ffffff; text-decoration:none; padding:12px 24px; border-radius:6px; font-weight:bold;">View your order</a></p>
+
+    <p style="margin:24px 0 0;"><a href="{{ order_url }}" style="display:inline-block; background-color:#1d4ed8; color:#ffffff; text-decoration:none; padding:12px 24px; border-radius:6px; font-weight:bold;">View your order</a></p>
 {% endblock %}
