@@ -4,7 +4,7 @@
     <section class="py-4 antialiased md:py-8">
         <div class="mx-auto max-w-2xl px-4">
             <h1 class="mb-6 text-2xl font-bold text-heading">My Account</h1>
-            <form method="post" novalidate>
+            <form method="post" enctype="multipart/form-data" novalidate>
                 {% csrf_token %}
 
                 <div class="mb-6 rounded-base border border-default bg-neutral-primary-soft p-6">
@@ -61,6 +61,35 @@
                             {{ profile_form.non_field_errors }}
                         </div>
                     {% endif %}
+                    <div class="mb-6 flex flex-col items-center gap-4 sm:flex-row" data-photo-preview="{{ profile_form.photo.id_for_label }}">
+                        <div class="relative h-24 w-24 shrink-0">
+                            <img data-photo-preview-img data-saved-src="{{ user_profile.photo_url }}"
+                                 src="{{ user_profile.photo_url }}" alt="Profile photo"
+                                 class="h-24 w-24 rounded-full border border-default object-cover" {% if not user_profile.photo %}hidden{% endif %}>
+                            <div data-photo-preview-placeholder {% if user_profile.photo %}hidden{% endif %}
+                                 class="flex h-24 w-24 items-center justify-center rounded-full border border-default bg-neutral-tertiary-medium text-body-subtle">
+                                <svg class="h-10 w-10" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1c0-2.76-3.58-5-8-5Z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="w-full">
+                            <label for="{{ profile_form.photo.id_for_label }}" class="label">Profile photo</label>
+                            {{ profile_form.photo }}
+                            <p data-photo-preview-status hidden class="helper-text text-fg-success-strong">New photo selected. Save changes to apply it.</p>
+                            <p class="helper-text">JPG, PNG or GIF, up to 2 MB.</p>
+                            {% for error in profile_form.photo.errors %}<p class="helper-text text-fg-danger">{{ error }}</p>{% endfor %}
+                            {% if user_profile.photo %}
+                                <label class="mt-2 flex cursor-pointer items-center gap-2 text-sm text-heading">
+                                    <input type="checkbox" name="remove_photo" id="{{ profile_form.remove_photo.id_for_label }}" data-photo-preview-clear
+                                           class="h-4 w-4 rounded border-default-medium text-brand focus:ring-brand"
+                                           {% if profile_form.remove_photo.value %}checked{% endif %}>
+                                    Remove photo
+                                </label>
+                            {% endif %}
+                            {% for error in profile_form.remove_photo.errors %}<p class="helper-text text-fg-danger">{{ error }}</p>{% endfor %}
+                        </div>
+                    </div>
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div class="mb-4">
                             <label for="{{ profile_form.date_of_birth.id_for_label }}" class="label">

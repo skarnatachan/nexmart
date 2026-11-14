@@ -193,7 +193,7 @@ def profile(request):
 
     if request.method == 'POST':
         user_form = UserUpdateForm(request.POST, instance=request.user)
-        profile_form = UserProfileForm(request.POST, instance=user_profile)
+        profile_form = UserProfileForm(request.POST, request.FILES, instance=user_profile)
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
@@ -203,4 +203,6 @@ def profile(request):
         user_form = UserUpdateForm(instance=request.user)
         profile_form = UserProfileForm(instance=user_profile)
 
-    return render(request, 'account/profile.html', {'user_form': user_form, 'profile_form': profile_form})
+    return render(request, 'account/profile.html', {
+        'user_form': user_form, 'profile_form': profile_form, 'user_profile': user_profile,
+    })

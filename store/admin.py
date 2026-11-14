@@ -6,7 +6,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ('size', 'color', 'category', 'is_available')
 
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ('product', 'name', 'created_at')
+    list_display = ('product', 'name', 'rating', 'created_at')
     list_filter = ('product',)
     search_fields = ('name', 'comment')
 

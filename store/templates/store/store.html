@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load humanize %}
+{% load humanize rating_tags %}
 {% block title %}Nexmart - Modern eCommerce with reasonable price{% endblock title %}
 {% block content %}
     <section class="bg-white py-4 antialiased dark:bg-gray-900 md:py-8">
@@ -124,8 +124,17 @@
                             </a>
                             <div class="flex flex-1 flex-col p-6 text-center">
                                 <a href="{% url 'products_detail' product.category.slug product.slug %}">
-                                    <h5 class="mt-3 mb-6 text-2xl font-semibold tracking-tight text-heading">{{ product.product_name }}</h5>
+                                    <h5 class="mt-3 mb-2 text-2xl font-semibold tracking-tight text-heading">{{ product.product_name }}</h5>
                                 </a>
+                    <div class="mb-4 flex h-5 items-center justify-center gap-1.5 text-sm text-body">
+                        {% if product.rating_count %}
+                            {% stars product.rating_average %}
+                            <span class="font-semibold text-heading">{{ product.rating_average|floatformat:1 }}</span>
+                            <span>({{ product.rating_count }})</span>
+                        {% else %}
+                            <span class="text-xs text-body-subtle">No reviews yet</span>
+                        {% endif %}
+                    </div>
                                 <p class="mb-4 text-xl font-bold">$ {{ product.price|intcomma }}</p>
                                 {% if product.stock == 0 %}
                                     <button type="button" disabled class="btn-secondary mt-auto">Out of Stock</button>

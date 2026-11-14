@@ -1,3 +1,7 @@
+from decimal import Decimal
+
+from django.conf import settings
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from category.models import Category
 from django.utils.text import slugify
@@ -61,6 +65,10 @@ class Product(models.Model):
             slug = f"{base_slug}-{counter}"
         return slug
 
+    def get_absolute_review_url(self):
+        from django.urls import reverse
+        return reverse('products_detail', args=[self.category.slug, self.slug])
+
     def variants(self):
         return Product.objects.filter(
             product_name=self.product_name, is_available=True
@@ -73,15 +81,28 @@ class Product(models.Model):
 
 class Review(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviews',
+    )
     name = models.CharField(max_length=100)
+    # 0.5 - 5.0 in half-star steps; null for older reviews written before ratings existed.
+    rating = models.DecimalField(
+        max_digits=2, decimal_places=1, null=True, blank=True,
+        validators=[MinValueValidator(Decimal('0.5')), MaxValueValidator(Decimal('5'))],
+    )
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True, blank=True, auto_now=True)
 
     def __str__(self):
         return f"{self.name} - {self.product.product_name}"
 
     class Meta:
         ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(fields=['product', 'user'], name='one_review_per_user_per_product'),
+        ]
+
 
 class Tax(models.Model):
     tax_value = models.DecimalField(max_digits=10, decimal_places=2)

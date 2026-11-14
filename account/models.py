@@ -78,6 +78,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     date_of_birth = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
+    photo = models.ImageField(upload_to='images/users', blank=True)
     phone_number = models.CharField(max_length=20, blank=True)
     shipping_address = models.CharField(max_length=255, blank=True)
     shipping_city = models.CharField(max_length=100, blank=True)
@@ -86,3 +87,7 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.email}'s profile"
+
+    @property
+    def photo_url(self):
+        return self.photo.url if self.photo else ''

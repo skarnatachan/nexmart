@@ -164,11 +164,11 @@
                 {% if request.user.is_authenticated %}
                 <button id="accountDropdownButton1" data-dropdown-toggle="accountDropdown1" type="button"
                         class="inline-flex items-center justify-center p-2 hover:bg-gray-100 rounded-lg text-sm font-medium leading-none text-gray-900 dark:text-white dark:hover:bg-gray-700">
-                    <svg class="w-5 h-5 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
+                    {% if request.user.profile.photo %}<img class="me-1 h-6 w-6 rounded-full object-cover" src="{{ request.user.profile.photo.url }}" alt=""/>{% else %}<svg class="w-5 h-5 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
                          height="24" fill="none" viewBox="0 0 24 24">
                         <path stroke="currentColor" stroke-width="2"
                               d="M7 17v1a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                    </svg>
+                    </svg>{% endif %}
                     Account
                     <svg class="w-4 h-4 text-gray-900 dark:text-white ms-1" aria-hidden="true"
                          xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -182,9 +182,16 @@
                     <div>
                         <a href="{% url 'profile' %}" title=""
                            class="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-600">
-                            <img class="h-8 w-8 shrink-0 rounded-full object-cover"
-                                 src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/jese-leos.png"
-                                 alt=""/>
+                            {% if request.user.profile.photo %}
+                                <img class="h-8 w-8 shrink-0 rounded-full object-cover"
+                                     src="{{ request.user.profile.photo.url }}" alt=""/>
+                            {% else %}
+                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-500 dark:bg-gray-600 dark:text-gray-300">
+                                    <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1c0-2.76-3.58-5-8-5Z"/>
+                                    </svg>
+                                </span>
+                            {% endif %}
                             <div class="min-w-0 flex-1">
                                 <p class="truncate text-sm font-semibold leading-tight text-gray-900 dark:text-white">
                                     {{ request.user.get_full_name }}</p>

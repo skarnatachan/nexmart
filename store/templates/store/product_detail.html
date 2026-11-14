@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load humanize %}
+{% load humanize rating_tags static %}
 {% block title %}{{ product.product_name }} - Nexmart{% endblock title %}
 {% block content %}
     <section class="py-4 antialiased md:py-8">
@@ -17,6 +17,13 @@
                 </div>
                 <div class="lg:w-1/2">
                     <h1 class="text-2xl font-bold text-heading sm:text-3xl">{{ product.product_name }}</h1>
+                    {% if rating_count %}
+                        <a href="#reviews" class="mt-2 inline-flex items-center gap-2 text-sm text-body hover:text-fg-brand">
+                            {% stars rating_average 'h-5 w-5' %}
+                            <span class="font-semibold text-heading">{{ rating_average|floatformat:1 }}</span>
+                            <span>({{ rating_count }} review{{ rating_count|pluralize }})</span>
+                        </a>
+                    {% endif %}
                     <p class="mt-4 text-2xl font-bold text-heading">$ {{ product.price|intcomma }}</p>
                     <p class="mt-4 text-body">{{ product.description }}</p>
                     {% if product.stock > 0 %}
@@ -110,21 +117,84 @@
                 </div>
             </div>
 
-            <div class="mt-12 border-t border-default pt-8">
-                <h2 class="mb-6 text-xl font-bold text-heading">Customer Reviews</h2>
+            <div id="reviews" class="mt-12 border-t border-default pt-8">
+                <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+                    <h2 class="text-xl font-bold text-heading">Customer Reviews</h2>
+                    {% if rating_count %}
+                        <div class="flex items-center gap-2 text-sm text-body">
+                            {% stars rating_average 'h-5 w-5' %}
+                            <span class="font-semibold text-heading">{{ rating_average|floatformat:1 }} out of 5</span>
+                            <span>· {{ rating_count }} rating{{ rating_count|pluralize }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-8 rounded-base border border-default bg-neutral-primary-soft p-5">
+                    {% if can_review %}
+                        <h3 class="mb-3 font-semibold text-heading">{% if my_review %}Edit your review{% else %}Write a review{% endif %}</h3>
+                        <form method="post" action="{% url 'review_submit' product.category.slug product.slug %}" id="review-form">
+                            {% csrf_token %}
+                            <label class="label" id="rating-label">Your rating</label>
+                            <div id="star-rating" class="mb-1 inline-flex items-center gap-1" role="slider" tabindex="0"
+                                 aria-labelledby="rating-label" aria-valuemin="0.5" aria-valuemax="5" aria-valuestep="0.5"
+                                 aria-valuenow="{{ review_form.rating.value|default:0 }}">
+                                {% for i in "12345" %}
+                                    <span class="star-slot relative inline-block h-8 w-8 cursor-pointer" data-star="{{ i }}">
+                                        <svg class="absolute inset-0 h-8 w-8 text-neutral-quaternary" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                            <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+                                        </svg>
+                                        <span class="star-fill pointer-events-none absolute inset-y-0 left-0 w-0 overflow-hidden">
+                                            <svg class="h-8 w-8 max-w-none text-yellow-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                                <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
+                                            </svg>
+                                        </span>
+                                    </span>
+                                {% endfor %}
+                                <span id="rating-text" class="ms-2 text-sm text-body"></span>
+                            </div>
+                            {{ review_form.rating }}
+                            {% for error in review_form.rating.errors %}<p class="helper-text text-fg-danger">{{ error }}</p>{% endfor %}
+                            <p class="helper-text">Click the left half of a star for a half rating.</p>
+                            <div class="mt-4">
+                                <label for="{{ review_form.comment.id_for_label }}" class="label">Your review</label>
+                                {{ review_form.comment }}
+                                {% for error in review_form.comment.errors %}<p class="helper-text text-fg-danger">{{ error }}</p>{% endfor %}
+                            </div>
+                            <button type="submit" class="btn-primary mt-4 cursor-pointer">{% if my_review %}Update review{% else %}Submit review{% endif %}</button>
+                        </form>
+                        {% if my_review %}
+                            <form method="post" action="{% url 'review_delete' product.category.slug product.slug %}" class="mt-2">
+                                {% csrf_token %}
+                                <button type="submit" class="link cursor-pointer text-sm text-fg-danger">Delete my review</button>
+                            </form>
+                        {% endif %}
+                    {% elif user.is_authenticated %}
+                        <p class="text-sm text-body">Only customers who have bought this product can review it.</p>
+                    {% else %}
+                        <p class="text-sm text-body"><a href="{% url 'login' %}?next={{ request.path }}" class="link">Log in</a> to review products you have bought.</p>
+                    {% endif %}
+                </div>
+
                 <div class="space-y-6">
                     {% for review in reviews %}
                         <div class="flex gap-4 border-b border-default-subtle pb-6">
+                            {% if review.user.profile.photo %}
+                                <img src="{{ review.user.profile.photo.url }}" alt="{{ review.name }}"
+                                     class="h-10 w-10 shrink-0 rounded-full object-cover"/>
+                            {% else %}
                             <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-neutral-tertiary-medium text-body">
                                 <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1c0-2.76-3.58-5-8-5Z"/>
                                 </svg>
                             </span>
-                            <div>
-                                <div class="flex items-center gap-2">
+                            {% endif %}
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-center gap-x-2">
                                     <span class="font-semibold text-heading">{{ review.name }}</span>
                                     <span class="text-xs text-body-subtle">{{ review.created_at|date:"M d, Y" }}</span>
+                                    {% if review.user_id %}<span class="text-xs text-fg-success-strong">Verified purchase</span>{% endif %}
                                 </div>
+                                {% if review.rating %}<div class="mt-1">{% stars review.rating %}</div>{% endif %}
                                 <p class="mt-1 text-sm text-body">{{ review.comment }}</p>
                             </div>
                         </div>
@@ -136,3 +206,4 @@
         </div>
     </section>
 {% endblock content %}
+{% block modals %}{% if can_review %}<script src="{% static 'js/star-rating.js' %}"></script>{% endif %}{% endblock modals %}

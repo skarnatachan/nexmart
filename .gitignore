@@ -288,3 +288,5 @@ fabric.properties
 node_modules
 package.json
 package-lock.json
+# Django migrations (per app)
+*/migrations/
