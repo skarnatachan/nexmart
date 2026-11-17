@@ -43,8 +43,8 @@ class CartItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     quantity = models.PositiveIntegerField(default=1)
-    size = models.CharField(max_length=2, blank=True, null=True)
-    color = models.CharField(max_length=20, blank=True, null=True)
+    size = models.CharField(max_length=50, blank=True, null=True)
+    color = models.CharField(max_length=50, blank=True, null=True)
     is_active = models.BooleanField(default=True)
 
     def sub_total(self):

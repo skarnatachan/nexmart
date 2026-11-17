@@ -19,6 +19,9 @@
             body: JSON.stringify(body || {})
         }).then(function (response) {
             return response.json().then(function (data) {
+                if (response.status === 401 && data.login_url) {
+                    window.location.href = data.login_url + '?next=' + encodeURIComponent(window.location.pathname);
+                }
                 if (!response.ok) throw new Error(data.error || 'Something went wrong.');
                 return data;
             });

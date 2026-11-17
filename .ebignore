@@ -1,0 +1,14 @@
+# Used by `eb deploy` instead of .gitignore, so locally generated app migrations ARE shipped.
+.git/
+.idea/
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+.env
+db.sqlite3
+media/
+ExternalData/
+staticfiles/
+.DS_Store
+.elasticbeanstalk/

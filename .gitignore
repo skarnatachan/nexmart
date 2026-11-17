@@ -290,3 +290,6 @@ package.json
 package-lock.json
 # Django migrations (per app)
 */migrations/
+
+# Elastic Beanstalk deploy bundles
+.elasticbeanstalk/app_versions/

@@ -71,3 +71,52 @@ class ProfilePhotoTests(TestCase):
         self._post()
         self.user.profile.refresh_from_db()
         self.assertEqual(self.user.profile.photo.name, name)
+
+
+class SessionTimeoutTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('t1', 'A', 'B', 't1@example.com', 'Testpass123!')
+        self.user.is_active = True
+        self.user.save()
+        self.client.force_login(self.user)
+
+    def _at(self, offset):
+        from unittest import mock
+        import time as real_time
+        return mock.patch('django_session_timeout.middleware.time.time', return_value=real_time.time() + offset), \
+            mock.patch('nexmart.middleware.time.time', return_value=real_time.time() + offset)
+
+    def _get(self, offset, url='/account/profile/', **kw):
+        a, b = self._at(offset)
+        with a, b:
+            return self.client.get(url, **kw)
+
+    def test_expires_after_900_seconds_of_inactivity(self):
+        self.assertEqual(self._get(0).status_code, 200)
+        r = self._get(901)
+        self.assertEqual(r.status_code, 302)
+        self.assertTrue(r.url.startswith('/account/login/?next=/account/profile/'))
+        self.assertNotIn('_auth_user_id', self.client.session)
+        self.assertIn('inactivity', self.client.get('/account/login/').content.decode())
+
+    def test_activity_extends_the_session(self):
+        self.assertEqual(self._get(0).status_code, 200)
+        self.assertEqual(self._get(600).status_code, 200)   # activity resets the clock...
+        self.assertEqual(self._get(1100).status_code, 200)  # ...so 500s later is still fine
+        self.assertEqual(self._get(2100).status_code, 302)  # 1000s idle -> expired
+
+    def test_json_requests_get_401(self):
+        self._get(0)
+        a, b = self._at(901)
+        with a, b:
+            r = self.client.post('/orders/ABC/paypal/create/', '{}', content_type='application/json')
+        self.assertEqual(r.status_code, 401)
+
+    def test_guests_are_never_timed_out_and_keep_their_cart(self):
+        self.client.logout()
+        session = self.client.session
+        session['cart_id'] = 'guest-cart'
+        session.save()
+        r = self._get(5000, '/')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(self.client.session.get('cart_id'), 'guest-cart')

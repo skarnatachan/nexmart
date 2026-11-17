@@ -1,0 +1,3 @@
+This app is a Django 6-compatible copy of django-admin-honeypot 1.1.0
+(https://github.com/dmpayton/django-admin-honeypot), Copyright (c) Derek Payton, MIT License.
+The original package no longer imports on Django >= 4.0 (removed url(), ugettext and Signal(providing_args)).

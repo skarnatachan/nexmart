@@ -22,7 +22,7 @@ def add_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id, is_available=True)
     cart_item, created = CartItem.objects.get_or_create(
         product=product, cart=_get_cart(request),
-        defaults={'size': product.size, 'color': product.color},
+        defaults={'size': str(product.size), 'color': str(product.color)},
     )
     if not created:
         cart_item.quantity += 1
