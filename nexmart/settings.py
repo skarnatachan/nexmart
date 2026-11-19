@@ -103,12 +103,24 @@ _rds = {
     "HOST": env("AWS_POSTGRESQL_HOSTNAME", default="") or env("RDS_HOSTNAME", default=""),
     "PORT": env("AWS_POSTGRESQL_PORT", default="") or env("RDS_PORT", default="5432"),
 }
-if _rds["HOST"]:
+if _rds["HOST"] and not DEBUG:  # DEBUG=True -> local sqlite/DATABASE_URL, never AWS
     DATABASES["default"] = {
         "ENGINE": "django.db.backends.postgresql",
         **_rds,
         "CONN_MAX_AGE": env.int("DB_CONN_MAX_AGE", default=60),
         "OPTIONS": {"sslmode": env("AWS_POSTGRESQL_SSLMODE", default="require")},
+    }
+
+
+# Local development (DEBUG=True): PostgreSQL from POSTGRESQL_DATABASE_* in .env.
+if DEBUG and env("POSTGRESQL_DATABASE_NAME", default=""):
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env("POSTGRESQL_DATABASE_NAME"),
+        "USER": env("POSTGRESQL_DATABASE_USER", default="postgres"),
+        "PASSWORD": env("POSTGRESQL_DATABASE_PASSWORD", default=""),
+        "HOST": env("POSTGRESQL_DATABASE_HOST", default="localhost"),
+        "PORT": env("POSTGRESQL_DATABASE_PORT", default="5432"),
     }
 
 
@@ -163,7 +175,7 @@ if env.bool("ON_ELASTIC_BEANSTALK", default=False):
 
 # Uploaded media (product images, profile photos) on Amazon S3. Elastic Beanstalk disks are ephemeral,
 # so set AWS_STORAGE_BUCKET_NAME in production; the instance role needs s3:PutObject/GetObject/DeleteObject.
-AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME", default="")
+AWS_STORAGE_BUCKET_NAME = "" if DEBUG else env("AWS_STORAGE_BUCKET_NAME", default="")  # DEBUG=True -> local media/
 if AWS_STORAGE_BUCKET_NAME:
     AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="ap-southeast-2")
     AWS_DEFAULT_ACL = None
@@ -205,7 +217,9 @@ LOGGING = {
 # https://docs.celeryq.dev/en/stable/django/first-steps-with-django.html
 
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://localhost:6379/0")
-if CELERY_BROKER_URL.startswith("sqs://"):
+if DEBUG and CELERY_BROKER_URL.startswith("sqs://"):
+    CELERY_BROKER_URL = "redis://localhost:6379/0"
+if CELERY_BROKER_URL.startswith("sqs://") and not DEBUG:
     # Amazon SQS broker (production). Credentials come from the instance role, never from the URL.
     # SQS cannot store task results, and the app never reads them.
     CELERY_BROKER_TRANSPORT_OPTIONS = {
